@@ -1,0 +1,7 @@
+# Optional DeepSeek Harness Web visualization bundle.
+# Installed through `dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.1.0`.
+# The client half registers Mermaid, table, and Vega-Lite assistant code-block renderers.
+
+- insert:
+    - id: dsh-visualization
+      name: dsh-visualization

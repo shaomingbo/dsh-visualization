@@ -1,0 +1,67 @@
+{
+  "name": "dsh-visualization",
+  "version": "0.1.0",
+  "description": "Secure Mermaid, data-table, and Vega-Lite visualization bundle for DeepSeek Harness Web.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./invariant": "./lib/invariant.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "dsh-visualization": "bin/install.js"
+  },
+  "files": [
+    "bin/install.js",
+    "cordis.patch.yml",
+    "lib/index.js",
+    "lib/invariant.js",
+    "lib/client.js",
+    "lib/vega-lite.worker.js",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check lib/*.js && node --check bin/install.js && node --test"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-theme"
+      ],
+      "platform": "web"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shaomingbo/dsh-visualization.git"
+  },
+  "homepage": "https://github.com/shaomingbo/dsh-visualization#readme",
+  "bugs": {
+    "url": "https://github.com/shaomingbo/dsh-visualization/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "cordis",
+    "mermaid",
+    "vega-lite",
+    "visualization"
+  ],
+  "author": "shaomingbo",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}
