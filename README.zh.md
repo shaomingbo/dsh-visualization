@@ -7,13 +7,13 @@
 ## 安装
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.1.0
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.0
 ```
 
 或运行一键安装器：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.1.0
+npx --yes github:shaomingbo/dsh-visualization#v0.2.0
 ```
 
 重启 `npx @deepseek-ai/dsh web`，然后硬刷新浏览器。更新：
@@ -28,9 +28,9 @@ dsh plugin --profile web update dsh-visualization
 dsh plugin --profile web remove dsh-visualization
 ```
 
-## Host 前提
+## Host 兼容性
 
-需要使用提供 session/keyed `conversation.chat.assistant.codeBlock` 插槽并能在 `/plugins/<id>/` 下提供 companion JavaScript 资产的 DSH 发布版本。较旧发布版会将所有 fence 显示为源码。
+插件按 Host 能力选择适配器。提供 session/keyed `conversation.chat.assistant.codeBlock` 插槽的版本走原生渲染 seam；能够在 `/plugins/<id>/` 下提供 companion JavaScript、但缺少该插槽的已发布 rc.2 Host 走失败开放的 DOM 兼容适配器：它只观察已结算代码块，在 Host 源码旁挂载同一套安全渲染器，并且仅在有效预览出现后隐藏 Host 代码块。未知 DOM、流式内容、解析失败和渲染失败都会保留原始源码。当前模式可通过 `document.documentElement.dataset.dshVisualizationAdapter` 在本地诊断。
 
 ## 支持内容
 
@@ -82,8 +82,8 @@ DSH 主题变化时会重新计算调色板；即使宿主 token 暂不可用，
 
 ## 安全
 
-- 富渲染只在 assistant 消息结算后启动；流式内容始终显示普通代码。
-- Mermaid 拒绝指令、活动链接/回调、任意 HTML 标签、远程资源和危险 CSS。C4 内嵌图标会被剥离，文字和形状保留。
+- 富渲染只在 assistant 消息结算后启动；流式内容始终显示普通代码。兼容适配器不会删除 Host DOM，并在卸载时恢复原代码块。
+- Mermaid 拒绝指令、活动链接/回调、任意 HTML 标签、远程资源和危险 CSS。旧内容中的 `<br/>` 标签只会在私有渲染输入中转换为惰性分隔文本，复制的源码保持不变。C4 内嵌图标会被剥离，文字和形状保留。
 - SVG 会经净化、结构校验、本地 ID 前缀化后序列化为 Blob，并通过 `<img>` 显示；原始 SVG 不进入文档。
 - Vega-Lite 在一次性 Worker 中运行，使用 AST 解释、拒绝所有加载器、输入/输出限制和两秒终止期限。
 - 不启用网络字体、外部数据、图片请求或原始 HTML。
@@ -100,7 +100,7 @@ npm run check
 npm pack --dry-run
 ```
 
-`lib/` 被有意提交：GitHub/pnpm 安装消费预构建 artifact，不在 profile 安装期构建插件。`lib/` 是发布权威；`src/` 仅保留为可读源码参考，不是独立支持的构建接口。本包不暴露 TypeScript 集成 API；受支持的集成面是 DSH bundle metadata 和 code-block slot。修改源码时，须使用匹配的 DSH client 打包工具重新生成两个浏览器 artifact，并在打 tag 前审阅产生的 `lib/` diff。
+`lib/` 被有意提交：GitHub/pnpm 安装消费预构建 artifact，不在 profile 安装期构建插件。`lib/` 是发布权威；`src/` 仅保留为可读源码参考，不是独立支持的构建接口。本包不暴露 TypeScript 集成 API；受支持的集成面是 DSH bundle metadata 与按能力选择的原生/兼容浏览器适配器。修改源码时，须使用匹配的 DSH client 打包工具重新生成两个浏览器 artifact，并在打 tag 前审阅产生的 `lib/` diff。
 
 ## 许可证
 

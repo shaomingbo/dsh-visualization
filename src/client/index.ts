@@ -8,6 +8,7 @@ import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { DataTableCodeBlock } from './DataTableCodeBlock.tsx'
 import { MermaidCodeBlock } from './MermaidCodeBlock.tsx'
 import { VegaLiteCodeBlock } from './VegaLiteCodeBlock.tsx'
+import { installLegacyDomAdapter } from './legacy-adapter.tsx'
 import {
   DATA_TABLE_NS,
   dataTableEn,
@@ -79,6 +80,27 @@ export function apply(ctx: ClientContext): void {
   })
   ctx.effect(() => () => { listeners.clear() }, 'dsh-visualization: theme subscribers')
 
+  if (ctx.slots.spec(CODE_BLOCK_SLOT) === undefined) {
+    ctx.effect(() => {
+      document.documentElement.dataset.dshVisualizationAdapter = 'legacy-dom'
+      const dispose = installLegacyDomAdapter({
+        theme,
+        tMermaid: ctx.locale.bind(MERMAID_NS),
+        tDataTable: ctx.locale.bind(DATA_TABLE_NS),
+        tVegaLite: ctx.locale.bind(VEGA_LITE_NS),
+      })
+      return () => {
+        dispose()
+        delete document.documentElement.dataset.dshVisualizationAdapter
+      }
+    }, 'dsh-visualization: legacy Assistant fence adapter')
+    return
+  }
+
+  ctx.effect(() => {
+    document.documentElement.dataset.dshVisualizationAdapter = 'native-slot'
+    return () => { delete document.documentElement.dataset.dshVisualizationAdapter }
+  }, 'dsh-visualization: native adapter diagnostics')
   ctx.slots.inject(CODE_BLOCK_SLOT, function* () {
     for (const key of MERMAID_KEYS) {
       yield ctx.slots.register({

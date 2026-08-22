@@ -7,13 +7,13 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 ## Install
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.1.0
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.0
 ```
 
 Or run the package installer:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.1.0
+npx --yes github:shaomingbo/dsh-visualization#v0.2.0
 ```
 
 Restart `npx @deepseek-ai/dsh web`, then hard-refresh the browser. To update:
@@ -28,9 +28,9 @@ To remove it:
 dsh plugin --profile web remove dsh-visualization
 ```
 
-## Host requirement
+## Host compatibility
 
-Use a DSH release that provides the session-keyed `conversation.chat.assistant.codeBlock` slot and serves plugin companion JavaScript assets under `/plugins/<id>/`. Older published DSH versions render all fences as source code.
+The plugin selects its adapter by Host capability. Releases that provide the session-keyed `conversation.chat.assistant.codeBlock` slot use the native renderer seam. Published rc.2 Hosts that serve companion JavaScript under `/plugins/<id>/` but lack that slot use a fail-open DOM adapter: it observes settled code blocks, mounts the same secure renderer beside the Host source, and hides the Host block only after a valid preview exists. Unknown markup, streaming content, parse failures, and renderer failures keep the original source visible. The active mode is exposed as `document.documentElement.dataset.dshVisualizationAdapter` for local diagnostics.
 
 ## Supported content
 
@@ -82,8 +82,8 @@ The palette is recalculated when the DSH theme changes. If host tokens are unava
 
 ## Security
 
-- Rich rendering starts only after an assistant message settles; streaming stays plain code.
-- Mermaid rejects directives, active links/callbacks, arbitrary HTML labels, remote resources, and unsafe CSS. C4 embedded image icons are stripped; text and shapes remain.
+- Rich rendering starts only after an assistant message settles; streaming stays plain code. The legacy adapter never deletes Host DOM and restores the original block on unload.
+- Mermaid rejects directives, active links/callbacks, arbitrary HTML labels, remote resources, and unsafe CSS. Legacy `<br/>` label breaks are converted to inert separator text only in the private render input; copied source is unchanged. C4 embedded image icons are stripped; text and shapes remain.
 - SVG is sanitized, structurally checked, locally ID-prefixed, serialized into a Blob, and shown through `<img>`; no raw SVG enters the document.
 - Vega-Lite runs in a disposable Worker with AST interpretation, a deny-all loader, bounded input/output, and a two-second termination deadline.
 - No network fonts, external data, image loads, or raw HTML are enabled.
@@ -100,7 +100,7 @@ npm run check
 npm pack --dry-run
 ```
 
-The `lib/` directory is committed on purpose: GitHub/pnpm installs consume prebuilt artifacts and do not build the plugin during profile installation. `lib/` is the release authority; `src/` is retained as readable source reference, not a standalone build interface. The package exposes no TypeScript integration API: its supported integration is the DSH bundle metadata and code-block slot. When changing source, regenerate both browser artifacts with the matching DSH client packaging tool and review the resulting `lib/` diff before tagging.
+The `lib/` directory is committed on purpose: GitHub/pnpm installs consume prebuilt artifacts and do not build the plugin during profile installation. `lib/` is the release authority; `src/` is retained as readable source reference, not a standalone build interface. The package exposes no TypeScript integration API: its supported integration is the DSH bundle metadata plus its capability-selected native/legacy browser adapters. When changing source, regenerate both browser artifacts with the matching DSH client packaging tool and review the resulting `lib/` diff before tagging.
 
 ## License
 

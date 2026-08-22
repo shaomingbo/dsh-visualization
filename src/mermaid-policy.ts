@@ -75,9 +75,9 @@ export function isMermaidFence(language: string, source: string): boolean {
  */
 export function prepareMermaidSource(source: string, expectedHeader: MermaidDiagramHeader | undefined): string {
   const detected = detectMermaidHeader(source)
-  let prepared = source
+  let prepared = source.replace(/<br\s*\/?\s*>/gi, ' · ')
   if (expectedHeader !== undefined) {
-    if (detected === undefined) prepared = `${expectedHeader}\n${source}`
+    if (detected === undefined) prepared = `${expectedHeader}\n${prepared}`
     else if (detected !== expectedHeader) {
       throw new Error(`Mermaid fence expects ${expectedHeader} but source starts with ${detected}`)
     }

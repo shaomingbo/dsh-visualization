@@ -53,6 +53,15 @@ test('mismatched direct fence header fails without changing displayed source', (
   )
 })
 
+test('legacy br labels become inert private text without changing copied source', () => {
+  const source = 'flowchart LR\nA["Web GUI<br/>Vite"] --> B'
+  const prepared = prepareMermaidSource(source, undefined)
+  assert.equal(prepared, 'flowchart LR\nA["Web GUI · Vite"] --> B')
+  assert.equal(validateMermaidSource(prepared), prepared)
+  assert.match(source, /<br\/>/)
+  assert.equal(prepareMermaidSource('item["One<br>Two"]', 'kanban'), 'kanban\nitem["One · Two"]')
+})
+
 test('Mermaid policy still rejects active document features', () => {
   for (const source of [
     '---\ntitle: unsafe\n---\nflowchart LR\nA --> B',

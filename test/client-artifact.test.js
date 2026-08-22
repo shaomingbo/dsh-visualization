@@ -29,6 +29,10 @@ test('browser artifact registers dsh-visualization without Node factory requires
   assert.match(source, /compactC4PersonTextY/)
   assert.match(source, /UpdateLayoutConfig/)
   assert.match(source, /\.sections \.cluster rect/)
+  assert.match(source, /installLegacyDomAdapter/)
+  assert.match(source, /MutationObserver/)
+  assert.match(source, /createRoot/)
+  assert.match(source, /slots\.spec\(CODE_BLOCK_SLOT\)/)
   assert.doesNotMatch(source, nodeBuiltinRequire)
 
   let handoff

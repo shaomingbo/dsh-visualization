@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const PACKAGE_NAME = 'dsh-visualization'
-const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.1.0'
+const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.2.0'
 
 function parseArgs(argv) {
   const result = { profile: 'web', source: process.env.DSH_VISUALIZATION_SOURCE || DEFAULT_SOURCE }
@@ -51,7 +51,7 @@ async function atomicWrite(path, content) {
 async function main() {
   const options = parseArgs(process.argv.slice(2))
   if (options.help) {
-    console.log(`Usage: ${PACKAGE_NAME} [--profile web] [--source github:shaomingbo/dsh-visualization#v0.1.0]\n\nInstalls the visualization bundle into a DSH profile.`)
+    console.log(`Usage: ${PACKAGE_NAME} [--profile web] [--source ${DEFAULT_SOURCE}]\n\nInstalls the visualization bundle into a DSH profile.`)
     return
   }
 
