@@ -7,13 +7,13 @@
 ## 安装
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.0
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.1
 ```
 
 或运行一键安装器：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.0
+npx --yes github:shaomingbo/dsh-visualization#v0.2.1
 ```
 
 重启 `npx @deepseek-ai/dsh web`，然后硬刷新浏览器。更新：
@@ -43,6 +43,8 @@ dsh plugin --profile web remove dsh-visualization
 | `vega-lite` | 在一次性 Worker 中渲染静态、仅内联数据的 Vega-Lite v6 图表。 |
 
 Mermaid 还支持 flowchart/graph、sequenceDiagram、classDiagram、stateDiagram-v2、erDiagram、gantt、pie、mindmap、timeline、gitGraph 和 journey。`xychart-beta`、`sankey-beta` 暂不启用。
+
+复杂图表可按 SVG 原始尺寸打开大图预览。大图支持 10%～300% 缩放、适应窗口、滚动条、鼠标/触摸拖拽平移、键盘缩放（`+`、`-`、`0`），并可通过 `Escape` 或点击空白区域关闭。
 
 ### 直接子类型示例
 

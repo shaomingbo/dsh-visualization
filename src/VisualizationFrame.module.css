@@ -103,6 +103,23 @@
   border-radius: 0;
 }
 
+.previewTrigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: zoom-in;
+}
+
+.previewTrigger:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary-new-colorprimary-new-color, #2563eb);
+  outline-offset: -3px;
+}
+
 .preview {
   display: block;
   box-sizing: border-box;
@@ -112,6 +129,28 @@
   padding: 24px;
   object-fit: contain;
   background: var(--dsw-alias-bg-layer-1, #fff);
+}
+
+.expandHint {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  padding: 4px 8px;
+  color: var(--dsw-alias-label-secondary, #52525b);
+  font: var(--dsw-font-xs-13, 500 13px/20px system-ui);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1, #fff) 92%, transparent);
+  border: 1px solid var(--dsw-alias-border-l2, rgb(24 24 27 / 14%));
+  border-radius: 7px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.previewTrigger:hover .expandHint,
+.previewTrigger:focus-visible .expandHint {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .status {
@@ -133,4 +172,156 @@
 .status button {
   color: var(--dsw-alias-label-primary, inherit);
   border: 1px solid var(--dsw-alias-border-l2, currentColor);
+}
+
+.lightbox {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  color: var(--dsw-alias-label-primary, #27272a);
+  background: rgb(9 9 11 / 78%);
+  backdrop-filter: blur(6px);
+}
+
+.lightboxToolbar,
+.zoomControls {
+  display: flex;
+  align-items: center;
+}
+
+.lightboxToolbar {
+  min-height: 52px;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 12px 6px 18px;
+  background: var(--dsw-alias-bg-layer-1, #fff);
+  border-bottom: 1px solid var(--dsw-alias-border-l2, rgb(24 24 27 / 14%));
+  box-shadow: 0 2px 12px rgb(0 0 0 / 12%);
+}
+
+.lightboxTitle {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.lightboxToolbar strong {
+  min-width: 0;
+  overflow: hidden;
+  font: var(--dsw-font-sm-14, 600 14px/22px system-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lightboxTitle span {
+  flex: none;
+  color: var(--dsw-alias-label-secondary, #71717a);
+  font: var(--dsw-font-xs-13, 400 13px/20px system-ui);
+  white-space: nowrap;
+}
+
+.zoomControls {
+  flex: none;
+  gap: 4px;
+}
+
+.zoomControls button {
+  display: inline-flex;
+  min-width: 32px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  color: var(--dsw-alias-label-secondary, #52525b);
+  font: var(--dsw-font-xs-13, 500 13px/20px system-ui);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.zoomControls button:hover:not(:disabled) {
+  color: var(--dsw-alias-label-primary, #27272a);
+  background: var(--dsw-alias-interactive-bg-hover, rgb(127 127 127 / 8%));
+  border-color: var(--dsw-alias-border-l1, rgb(24 24 27 / 10%));
+}
+
+.zoomControls button:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary-new-colorprimary-new-color, #2563eb);
+  outline-offset: 1px;
+}
+
+.zoomControls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.lightboxCanvas {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  cursor: grab;
+  overscroll-behavior: contain;
+  touch-action: none;
+  user-select: none;
+}
+
+.lightboxCanvasPanning {
+  cursor: grabbing;
+}
+
+.lightboxStage {
+  display: grid;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  height: max-content;
+  min-height: 100%;
+  place-items: center;
+  padding: 32px;
+}
+
+.expandedPreview {
+  display: block;
+  max-width: none;
+  height: auto;
+  user-select: none;
+  background: var(--dsw-alias-bg-layer-1, #fff);
+  border-radius: 8px;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 22%);
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    gap: 8px;
+  }
+
+  .actions {
+    overflow-x: auto;
+  }
+
+  .lightboxToolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px;
+  }
+
+  .zoomControls {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .lightboxStage {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expandHint {
+    transition: none;
+  }
 }

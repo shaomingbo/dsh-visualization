@@ -7,13 +7,13 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 ## Install
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.0
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.1
 ```
 
 Or run the package installer:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.0
+npx --yes github:shaomingbo/dsh-visualization#v0.2.1
 ```
 
 Restart `npx @deepseek-ai/dsh web`, then hard-refresh the browser. To update:
@@ -43,6 +43,8 @@ The plugin selects its adapter by Host capability. Releases that provide the ses
 | `vega-lite` | Static inline-only Vega-Lite v6 chart in a one-shot Worker. |
 
 Mermaid also supports flowchart/graph, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, pie, mindmap, timeline, gitGraph, and journey. `xychart-beta` and `sankey-beta` are intentionally not enabled.
+
+Complex diagrams can be opened in an expanded preview at their authored SVG size. The expanded view supports 10%–300% zoom, fit-to-window, scrollbars, mouse/touch drag-to-pan, keyboard zoom (`+`, `-`, `0`), and `Escape` or backdrop dismissal.
 
 ### Direct subtype examples
 

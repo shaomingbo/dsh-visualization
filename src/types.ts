@@ -6,6 +6,14 @@ export interface VisualizationLabels {
   readonly copied: string
   readonly retry: string
   readonly download: string
+  readonly expand: string
+  readonly expandedView: string
+  readonly close: string
+  readonly zoomIn: string
+  readonly zoomOut: string
+  readonly resetZoom: string
+  readonly fit: string
+  readonly dragToPan: string
   readonly rendering: string
   readonly unavailable: string
   readonly tooBusy: string
