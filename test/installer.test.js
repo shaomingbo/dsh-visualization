@@ -12,6 +12,6 @@ test('installer documents the GitHub source without mutating a profile on help',
     encoding: 'utf8',
   })
   assert.equal(result.status, 0, result.stderr)
-  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.2\.2/)
+  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.2\.3/)
   assert.match(result.stdout, /--profile web/)
 })

@@ -7,13 +7,13 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 ## Install
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.2
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.3
 ```
 
 Or run the package installer:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.2
+npx --yes github:shaomingbo/dsh-visualization#v0.2.3
 ```
 
 Restart `npx @deepseek-ai/dsh web`, then hard-refresh the browser. To update:

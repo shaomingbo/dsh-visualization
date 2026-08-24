@@ -15,6 +15,7 @@ const DATA_TABLE_PROMPT = 'Use fenced `csv`, `tsv`, or `json-table` blocks for t
 const MERMAID_PROMPT = 'Use fenced Mermaid code blocks only when a diagram materially improves the answer. '
   + 'Allowed Mermaid families are flowchart/graph, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, pie, mindmap, timeline, gitGraph, journey, kanban, quadrantChart, C4Context, C4Container, C4Component, C4Dynamic, C4Deployment, and requirementDiagram. '
   + 'Use a `mermaid` or matching subtype fence, never a `text` fence; a subtype fence body may omit its repeated header. '
+  + 'Use conservative Mermaid 11 syntax. In flowcharts, use pipe-form edge labels such as `A -->|label| B` or `A -.->|label| B`; do not place free text inside link operators. Quote punctuation-heavy node labels as `A["label"]`, especially paths or text containing slashes, dots, parentheses, or colons. Keep labels plain text and do not insert HTML such as `<br>`. '
   + 'C4 diagrams render without embedded icons, so prefer short Person/System/Container/Component labels. Requirement blocks must use Mermaid 11 fields `id`, `text`, `risk`, and `verifymethod`; do not use `as` aliases or `testcase` blocks. '
   + 'Do not use frontmatter, directives, HTML labels, click or href links and callbacks, classDef, linkStyle, or style declarations.'
 

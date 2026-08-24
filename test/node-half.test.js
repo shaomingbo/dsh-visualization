@@ -24,5 +24,7 @@ test('node half registers only the three static prompt sections', () => {
   assert.match(sections[1].text, /kanban/)
   assert.match(sections[1].text, /never a `text` fence/)
   assert.match(sections[1].text, /verifymethod/)
+  assert.match(sections[1].text, /A -\.->\|label\| B/)
+  assert.match(sections[1].text, /punctuation-heavy node labels/)
   assert.doesNotMatch(sections[1].text, /xychart-beta|sankey-beta/)
 })
