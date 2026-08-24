@@ -44,6 +44,11 @@ test('Kanban config uses modern section layout and family CSS', () => {
   assert.match(config.themeCSS ?? '', /drop-shadow/)
 })
 
+test('Mindmap circle labels are horizontally centered', () => {
+  const config = buildMermaidConfig(light, 'light', 'mindmap\n  root((Context))', 500)
+  assert.match(config.themeCSS ?? '', /\.mindmap-node > circle\.label-container \+ \.label text\s*\{[^}]*text-anchor:\s*middle/)
+})
+
 test('C4 config projects palette into every shape family and fixes text', () => {
   const config = buildMermaidConfig(light, 'light', 'C4Context\nPerson(user, "User")', 500)
   assert.equal(config.c4?.person_bg_color, light.surface)

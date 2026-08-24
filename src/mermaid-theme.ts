@@ -225,6 +225,7 @@ function buildMermaidThemeCss(
     .cluster rect { rx: 12px; ry: 12px; stroke-width: 1px; }
     .flowchart-link, .messageLine0, .messageLine1, .relationshipLine { stroke-width: 1.25px; }
     .edgeLabel rect, .labelBkg { fill: ${palette.background}; opacity: 0.96; }
+    .mindmap-node > circle.label-container + .label text { text-anchor: middle; }
   `
   const first = source.split(/\r?\n/).find(line => line.trim().length > 0)?.trim() ?? ''
   if (first.startsWith('kanban')) {
