@@ -82,7 +82,22 @@ export function prepareMermaidSource(source: string, expectedHeader: MermaidDiag
       throw new Error(`Mermaid fence expects ${expectedHeader} but source starts with ${detected}`)
     }
   }
+  prepared = normalizeTimelinePeriodColons(prepared)
   return applyTrustedC4Layout(prepared)
+}
+
+/** Keep time-of-day text out of Timeline's colon-delimited period grammar. */
+function normalizeTimelinePeriodColons(source: string): string {
+  if (detectMermaidHeader(source) !== 'timeline') return source
+  return source.split(/\r?\n/).map((line) => {
+    const trimmed = line.trimStart()
+    if (/^(?:timeline\b|title\s|section\s|accTitle\s*:|accDescr\b)/i.test(trimmed)) return line
+    const separator = /\s+:\s+/.exec(line)
+    if (separator?.index === undefined) return line
+    const period = line.slice(0, separator.index)
+    if (!/\d:\d/.test(period)) return line
+    return period.replace(/(\d):(?=\d)/g, '$1：') + line.slice(separator.index)
+  }).join('\n')
 }
 
 function applyTrustedC4Layout(source: string): string {

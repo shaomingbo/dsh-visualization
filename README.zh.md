@@ -7,13 +7,13 @@
 ## 安装
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.3
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.4
 ```
 
 或运行一键安装器：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.3
+npx --yes github:shaomingbo/dsh-visualization#v0.2.4
 ```
 
 重启 `npx @deepseek-ai/dsh web`，然后硬刷新浏览器。更新：

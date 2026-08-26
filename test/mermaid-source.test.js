@@ -62,6 +62,17 @@ test('legacy br labels become inert private text without changing copied source'
   assert.equal(prepareMermaidSource('item["One<br>Two"]', 'kanban'), 'kanban\nitem["One · Two"]')
 })
 
+test('timeline period times become parse-safe private labels without changing copied source', () => {
+  const source = `timeline
+    title 本周 grok 活动
+    8/19-8/24 : 193 次模型请求（真实消耗）
+    8/25 09:45 : CodexBar 重启后继续`
+  const prepared = prepareMermaidSource(source, undefined)
+  assert.match(prepared, /8\/25 09：45 : CodexBar/)
+  assert.match(source, /8\/25 09:45 : CodexBar/)
+  assert.equal(prepareMermaidSource(prepared, undefined), prepared)
+})
+
 test('Mermaid policy still rejects active document features', () => {
   for (const source of [
     '---\ntitle: unsafe\n---\nflowchart LR\nA --> B',

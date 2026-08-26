@@ -26,5 +26,6 @@ test('node half registers only the three static prompt sections', () => {
   assert.match(sections[1].text, /verifymethod/)
   assert.match(sections[1].text, /A -\.->\|label\| B/)
   assert.match(sections[1].text, /punctuation-heavy node labels/)
+  assert.match(sections[1].text, /09：45/)
   assert.doesNotMatch(sections[1].text, /xychart-beta|sankey-beta/)
 })
