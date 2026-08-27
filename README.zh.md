@@ -6,25 +6,32 @@
 
 ## 安装
 
+首选固定 Release 的安装器；不带命令时默认安装到 `web` profile：
+
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.4
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5
 ```
 
-或运行一键安装器：
+使用同一固定版本查看状态或卸载：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.4
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5 status
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5 uninstall
 ```
 
-重启 `npx @deepseek-ai/dsh web`，然后硬刷新浏览器。更新：
+本地开发时保持安装器版本固定，只覆盖插件来源：
 
 ```bash
-dsh plugin --profile web update dsh-visualization
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5 install \
+  --source link:/absolute/path/to/dsh-visualization
 ```
 
-卸载：
+安装器支持 `--profile`、`--source` 和 `--help`。它只原子修改本插件的依赖与 bundle 条目，然后执行 `pnpm install --ignore-scripts`，不会重启 DSH。安装或卸载后请手动重启 DSH，并强制刷新现有 Web GUI。
+
+手动 CLI 兜底：
 
 ```bash
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.5
 dsh plugin --profile web remove dsh-visualization
 ```
 

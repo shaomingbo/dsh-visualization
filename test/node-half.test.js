@@ -21,6 +21,8 @@ test('node half registers only the three static prompt sections', () => {
     ['ui:mermaid', 190],
     ['ui:vega-lite', 190],
   ])
+  assert.match(sections[0].text, /"columns"/)
+  assert.match(sections[0].text, /"rows"/)
   assert.match(sections[1].text, /kanban/)
   assert.match(sections[1].text, /never a `text` fence/)
   assert.match(sections[1].text, /verifymethod/)

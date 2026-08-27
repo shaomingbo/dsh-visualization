@@ -10,7 +10,7 @@ import type {} from '@deepseek-ai/dsh-system-prompt'
 /** Services required for the model guidance paired with the browser renderers. */
 export const inject = ['systemPrompt']
 
-const DATA_TABLE_PROMPT = 'Use fenced `csv`, `tsv`, or `json-table` blocks for tabular data that should render as a table. Keep ordinary JSON in `json` fences so it remains code.'
+const DATA_TABLE_PROMPT = 'Use fenced `csv`, `tsv`, or `json-table` blocks for tabular data that should render as a table. For `json-table`, use either an array of flat objects or an object shaped as `{"columns":["Column"],"rows":[["Value"]]}`. Keep ordinary JSON in `json` fences so it remains code.'
 
 const MERMAID_PROMPT = 'Use fenced Mermaid code blocks only when a diagram materially improves the answer. '
   + 'Allowed Mermaid families are flowchart/graph, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, pie, mindmap, timeline, gitGraph, journey, kanban, quadrantChart, C4Context, C4Container, C4Component, C4Dynamic, C4Deployment, and requirementDiagram. '

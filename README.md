@@ -6,25 +6,32 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 
 ## Install
 
+Use the fixed release installer. With no command it installs into the `web` profile:
+
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.4
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5
 ```
 
-Or run the package installer:
+Check status or uninstall with the same pinned release:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.4
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5 status
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5 uninstall
 ```
 
-Restart `npx @deepseek-ai/dsh web`, then hard-refresh the browser. To update:
+For local development, keep the installer pinned but override its package source:
 
 ```bash
-dsh plugin --profile web update dsh-visualization
+npx --yes github:shaomingbo/dsh-visualization#v0.2.5 install \
+  --source link:/absolute/path/to/dsh-visualization
 ```
 
-To remove it:
+The installer supports `--profile`, `--source`, and `--help`. It atomically updates only this dependency and bundle entry, then runs `pnpm install --ignore-scripts`. It never restarts DSH. Restart DSH manually after install or uninstall, then hard-refresh the existing Web GUI.
+
+Manual CLI fallback:
 
 ```bash
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.5
 dsh plugin --profile web remove dsh-visualization
 ```
 
