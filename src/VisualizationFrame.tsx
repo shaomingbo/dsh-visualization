@@ -63,6 +63,7 @@ export function VisualizationFrame(props: VisualizationFrameProps) {
           ? (
             <PreviewBody
               pending={props.pending}
+              waiting={props.waiting}
               error={error}
               previewUrl={previewUrl}
               alt={props.preview?.alt}
@@ -90,6 +91,7 @@ export function VisualizationFrame(props: VisualizationFrameProps) {
 
 interface PreviewBodyProps {
   readonly pending: boolean | undefined
+  readonly waiting: boolean | undefined
   readonly error: string | undefined
   readonly previewUrl: string | undefined
   readonly alt: string | undefined
@@ -99,7 +101,7 @@ interface PreviewBodyProps {
 }
 
 function PreviewBody(props: PreviewBodyProps) {
-  if (props.pending === true) return <p className={css.status}>{props.labels.rendering}</p>
+  if (props.pending === true || props.waiting === true) return <p className={css.status}>{props.labels.rendering}</p>
   if (props.error !== undefined) {
     return (
       <div className={css.status} role="alert">

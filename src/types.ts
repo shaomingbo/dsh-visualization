@@ -39,6 +39,8 @@ export interface VisualizationFrameProps {
   readonly title?: string | undefined
   readonly preview?: VisualizationPreview | undefined
   readonly pending?: boolean | undefined
+  /** Lazy deferral before any render attempt; shows progress, never the failure label. */
+  readonly waiting?: boolean | undefined
   readonly preferSource?: boolean | undefined
   readonly error?: string | undefined
   readonly onRetry?: (() => void) | undefined

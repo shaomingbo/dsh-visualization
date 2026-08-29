@@ -60,6 +60,7 @@ export function MermaidVisualization(props: MermaidVisualizationProps) {
         labels={props.labels}
         preview={preview}
         pending={state.pending}
+        waiting={visibility === 'waiting'}
         error={state.error}
         preferSource={visibility === 'unsupported'}
         onRetry={() => { setRetry(value => value + 1) }}

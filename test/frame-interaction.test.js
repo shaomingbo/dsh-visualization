@@ -32,3 +32,17 @@ test('expanded-view controls are localized for Mermaid and Vega-Lite', () => {
     assert.equal((locales.match(new RegExp(`'${key}':`, 'g')) ?? []).length, 4, `expected four locale entries for ${key}`)
   }
 })
+
+test('offscreen lazy previews show progress instead of the failure label', () => {
+  const mermaid = readFileSync(fileURLToPath(new URL('../src/MermaidVisualization.tsx', import.meta.url)), 'utf8')
+  const vega = readFileSync(fileURLToPath(new URL('../src/VegaLiteVisualization.tsx', import.meta.url)), 'utf8')
+  // A frame whose render has merely not started yet (IntersectionObserver
+  // still waiting) must read as in-progress, never as "cannot render safely".
+  assert.match(frame, /props\.pending === true \|\| props\.waiting === true[\s\S]*?props\.labels\.rendering/)
+  assert.match(frame, /waiting=\{props\.waiting\}/)
+  for (const source of [mermaid, vega]) {
+    assert.match(source, /waiting=\{visibility === 'waiting'\}/)
+  }
+  // The failure label stays reserved for the post-attempt error branch.
+  assert.match(frame, /props\.error !== undefined[\s\S]*?props\.labels\.unavailable/)
+})

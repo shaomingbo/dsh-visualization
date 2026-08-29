@@ -55,6 +55,7 @@ export function VegaLiteVisualization(props: VegaLiteVisualizationProps) {
         labels={props.labels}
         preview={preview}
         pending={state.pending}
+        waiting={visibility === 'waiting'}
         error={error}
         preferSource={visibility === 'unsupported'}
         onRetry={source.error === undefined ? () => { setRetry(value => value + 1) } : undefined}
