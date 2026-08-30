@@ -9,7 +9,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 
 test('declares an installable DSH Web bundle and client entry', () => {
   assert.equal(pkg.name, 'dsh-visualization')
-  assert.equal(pkg.version, '0.2.5')
+  assert.equal(pkg.version, '0.2.6')
   assert.deepEqual(pkg.dsh.bundle, { patch: './cordis.patch.yml' })
   assert.equal(pkg.dsh.client.platform, 'web')
   assert.deepEqual(pkg.dsh.client.inject, [
