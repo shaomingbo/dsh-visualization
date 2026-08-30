@@ -55,7 +55,7 @@ async function readManifest(path) {
 test('help documents fixed release source and all installer commands', () => {
   const result = run(['--help'])
   assert.equal(result.status, 0, result.stderr)
-  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.2\.5/)
+  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.2\.7/)
   assert.match(result.stdout, /install\|status\|uninstall/)
   assert.match(result.stdout, /--profile web/)
 })
