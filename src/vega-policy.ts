@@ -6,7 +6,11 @@ const SOURCE_FORBIDDEN_KEYS = new Set([
   'url', 'href', 'src', 'image', 'on', 'bind', 'selection', 'select', 'params', 'usermeta', 'autosize', 'datasets',
   '__proto__', 'prototype', 'constructor',
 ])
-const ALLOWED_MARKS = new Set(['arc', 'area', 'bar', 'line', 'point', 'rect', 'rule', 'text', 'tick', 'trail'])
+const ALLOWED_SCHEMA = 'https://vega.github.io/schema/vega-lite/v6.json'
+const ALLOWED_MARKS = new Set([
+  'arc', 'area', 'bar', 'boxplot', 'circle', 'errorband', 'errorbar', 'geoshape',
+  'line', 'point', 'rect', 'rule', 'square', 'text', 'tick', 'trail',
+])
 const EXPRESSION_KEYS = new Set(['expr', 'expression', 'calculate', 'test'])
 const ALLOWED_TRANSFORMS = new Set([
   'aggregate', 'bin', 'joinaggregate', 'sample', 'stack', 'timeunit', 'window',
@@ -77,6 +81,10 @@ function visitSource(
     if (utf8Bytes(value) > LIMITS.stringBytes) throw new Error(`Vega-Lite string exceeds ${LIMITS.stringBytes} UTF-8 bytes`)
     if (/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(value)) {
       throw new Error('Vega-Lite strings must contain paired UTF-16 surrogates')
+    }
+    if (parentKey === '$schema') {
+      if (value !== ALLOWED_SCHEMA) throw new Error('Vega-Lite $schema must be the official v6 schema URL')
+      return
     }
     if (/(?:https?:|file:|data:|blob:|\/\/)/i.test(value)) throw new Error('Vega-Lite external URLs are not allowed')
     if (parentKey === 'mark' && !ALLOWED_MARKS.has(value.toLowerCase())) throw new Error(`Vega-Lite mark ${value} is not allowed`)

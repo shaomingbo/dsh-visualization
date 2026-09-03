@@ -9,20 +9,20 @@
 首选固定 Release 的安装器；不带命令时默认安装到 `web` profile：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8
 ```
 
 使用同一固定版本查看状态或卸载：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7 status
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8 status
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8 uninstall
 ```
 
 本地开发时保持安装器版本固定，只覆盖插件来源：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
@@ -31,7 +31,7 @@ npx --yes github:shaomingbo/dsh-visualization#v0.2.7 install \
 手动 CLI 兜底：
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.7
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.8
 dsh plugin --profile web remove dsh-visualization
 ```
 
@@ -94,7 +94,7 @@ DSH 主题变化时会重新计算调色板；即使宿主 token 暂不可用，
 - 富渲染只在 assistant 消息结算后启动；流式内容始终显示普通代码。兼容适配器不会删除 Host DOM，并在卸载时恢复原代码块。
 - Mermaid 拒绝指令、活动链接/回调、任意 HTML 标签、远程资源和危险 CSS。旧内容中的 `<br/>` 标签只会在私有渲染输入中转换为惰性分隔文本，复制的源码保持不变。C4 内嵌图标会被剥离，文字和形状保留。
 - SVG 会经净化、结构校验、本地 ID 前缀化后序列化为 Blob，并通过 `<img>` 显示；原始 SVG 不进入文档。
-- Vega-Lite 在一次性 Worker 中运行，使用 AST 解释、拒绝所有加载器、输入/输出限制和两秒终止期限。
+- Vega-Lite 在一次性 Worker 中运行，使用 AST 解释、拒绝所有加载器、输入/输出限制和两秒终止期限。`$schema` 仅接受官方 v6 schema URL，纯元数据，从不发起网络请求。
 - 不启用网络字体、外部数据、图片请求或原始 HTML。
 
 ## Artifact 大小

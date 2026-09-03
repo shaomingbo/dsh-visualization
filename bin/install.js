@@ -7,7 +7,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const PACKAGE_NAME = 'dsh-visualization'
-const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.2.7'
+const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.2.8'
 const COMMANDS = new Set(['install', 'status', 'uninstall'])
 
 function parseArgs(argv) {

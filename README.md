@@ -9,20 +9,20 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 Use the fixed release installer. With no command it installs into the `web` profile:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8
 ```
 
 Check status or uninstall with the same pinned release:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7 status
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8 status
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8 uninstall
 ```
 
 For local development, keep the installer pinned but override its package source:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.2.7 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.2.8 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
@@ -31,7 +31,7 @@ The installer supports `--profile`, `--source`, and `--help`. It atomically upda
 Manual CLI fallback:
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.7
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.8
 dsh plugin --profile web remove dsh-visualization
 ```
 
@@ -94,7 +94,7 @@ The palette is recalculated when the DSH theme changes. If host tokens are unava
 - Rich rendering starts only after an assistant message settles; streaming stays plain code. The legacy adapter never deletes Host DOM and restores the original block on unload.
 - Mermaid rejects directives, active links/callbacks, arbitrary HTML labels, remote resources, and unsafe CSS. Legacy `<br/>` label breaks are converted to inert separator text only in the private render input; copied source is unchanged. C4 embedded image icons are stripped; text and shapes remain.
 - SVG is sanitized, structurally checked, locally ID-prefixed, serialized into a Blob, and shown through `<img>`; no raw SVG enters the document.
-- Vega-Lite runs in a disposable Worker with AST interpretation, a deny-all loader, bounded input/output, and a two-second termination deadline.
+- Vega-Lite runs in a disposable Worker with AST interpretation, a deny-all loader, bounded input/output, and a two-second termination deadline. The `$schema` field is accepted only as the official v6 schema URL; it is metadata and is never fetched.
 - No network fonts, external data, image loads, or raw HTML are enabled.
 
 ## Artifact size
