@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process'
-import { readFile, rename, unlink, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
 const PACKAGE_NAME = 'dsh-visualization'
-const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.0'
+const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.1'
+/** The dsh CLI release this installer was verified against, end to end. */
+const VERIFIED_DSH_VERSION = '0.1.2-alpha.3'
+const VERIFIED_HOST = 'DSH web/base 0.1.2-rc.1'
 const COMMANDS = new Set(['install', 'status', 'uninstall'])
 
 function parseArgs(argv) {
@@ -42,94 +44,79 @@ function usage() {
 
 Commands:
   install     Install or update the bundle (default when omitted)
-  status      Show whether the bundle is installed
+  status      Read-only check whether the bundle is installed
   uninstall   Remove the bundle from the profile
 
 Options:
   --profile   Target DSH profile (default: web)
   --source    Fixed tag or local link source
-  --help      Show this help`
+  --help      Show this help
+
+Install and uninstall delegate to the official \`dsh plugin\` management
+command, which initializes the profile and maintains the bundle list.
+Verified installer matrix: dsh ${VERIFIED_DSH_VERSION} with ${VERIFIED_HOST}.`
 }
 
-function runPackageInstall(profileDir) {
-  const attempts = [
-    ['pnpm', ['install', '--ignore-scripts']],
-    ['corepack', ['pnpm', 'install', '--ignore-scripts']],
-  ]
-  for (const [command, args] of attempts) {
-    const result = spawnSync(command, args, { cwd: profileDir, stdio: 'inherit' })
-    if (!result.error && result.status === 0) return
-    if (result.error?.code !== 'ENOENT') {
-      throw new Error(`${command} ${args.join(' ')} failed with exit code ${result.status}`)
+function profilePackagePath(profile) {
+  const dshHome = process.env.DSH_HOME || join(homedir(), '.dsh')
+  return join(dshHome, 'profiles', profile, 'package.json')
+}
+
+/**
+ * Read-only manifest inspection. Missing profiles, missing files, and broken
+ * JSON are reported as values instead of crashing the CLI.
+ */
+async function readProfileState(profile) {
+  const packagePath = profilePackagePath(profile)
+  let source
+  try {
+    const raw = await readFile(packagePath, 'utf8')
+    let manifest
+    try {
+      manifest = JSON.parse(raw)
+    } catch (error) {
+      return { state: 'unreadable', packagePath, reason: `profile package.json is not valid JSON: ${error instanceof Error ? error.message : String(error)}` }
     }
-  }
-  throw new Error('pnpm is unavailable; install pnpm or enable it with corepack')
-}
-
-async function atomicWrite(path, content) {
-  const temp = `${path}.${process.pid}.dsh-visualization.tmp`
-  try {
-    await writeFile(temp, content, 'utf8')
-    await rename(temp, path)
+    const dependencies = manifest?.dependencies
+    source = typeof dependencies?.[PACKAGE_NAME] === 'string' ? dependencies[PACKAGE_NAME] : undefined
+    const bundles = Array.isArray(manifest?.dsh?.profile?.bundles) ? manifest.dsh.profile.bundles : []
+    const enabled = bundles.includes(PACKAGE_NAME)
+    if (source !== undefined && enabled) return { state: 'installed', packagePath, source }
+    if (source === undefined && !enabled) return { state: 'absent', packagePath }
+    return { state: 'partial', packagePath, source }
   } catch (error) {
-    await unlink(temp).catch(() => {})
-    throw error
+    if (error?.code === 'ENOENT') return { state: 'absent', packagePath }
+    return { state: 'unreadable', packagePath, reason: error instanceof Error ? error.message : String(error) }
   }
 }
 
-function isRecord(value) {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
+/** Probe the dsh CLI and gate on the verified version; no side effects. */
+function detectDsh() {
+  const probe = spawnSync('dsh', ['--version'], { encoding: 'utf8' })
+  if (probe.error?.code === 'ENOENT') return { ok: false, reason: 'missing' }
+  if (probe.error !== undefined || probe.status !== 0) return { ok: false, reason: 'unknown' }
+  const version = (probe.stdout ?? '').trim()
+  if (version === '') return { ok: false, reason: 'unknown' }
+  if (version !== VERIFIED_DSH_VERSION) return { ok: false, reason: 'unverified', version }
+  return { ok: true, version }
 }
 
-function parseManifest(source) {
-  let manifest
-  try {
-    manifest = JSON.parse(source)
-  } catch (error) {
-    throw new Error(`profile package.json is not valid JSON: ${error instanceof Error ? error.message : String(error)}`)
+function dshFailureGuidance(detection) {
+  if (detection.reason === 'missing') {
+    return `The dsh CLI was not found on PATH. Install DeepSeek Harness first (it provides dsh and the profiles/ layout), then re-run this installer. Verified installer matrix: dsh ${VERIFIED_DSH_VERSION} with ${VERIFIED_HOST}.`
   }
-  if (!isRecord(manifest)) throw new Error('profile package.json must contain a JSON object')
-  if (manifest.dependencies !== undefined && !isRecord(manifest.dependencies)) {
-    throw new Error('profile dependencies must be an object')
-  }
-  if (manifest.dsh !== undefined && !isRecord(manifest.dsh)) throw new Error('profile dsh must be an object')
-  if (isRecord(manifest.dsh) && manifest.dsh.profile !== undefined && !isRecord(manifest.dsh.profile)) {
-    throw new Error('profile dsh.profile must be an object')
-  }
-  const bundles = isRecord(manifest.dsh) && isRecord(manifest.dsh.profile)
-    ? manifest.dsh.profile.bundles
-    : undefined
-  if (bundles !== undefined && (!Array.isArray(bundles) || !bundles.every(item => typeof item === 'string'))) {
-    throw new Error('profile dsh.profile.bundles must be an array of strings')
-  }
-  return manifest
+  const detected = detection.version !== undefined ? ` Detected dsh ${detection.version}.` : ''
+  return `dsh ${VERIFIED_DSH_VERSION} is the only CLI version this installer has verified (with ${VERIFIED_HOST}).${detected} Switch the dsh CLI to the verified version and re-run; see the README for the verified matrix.`
 }
 
-function getInstallation(manifest) {
-  const source = isRecord(manifest.dependencies) && typeof manifest.dependencies[PACKAGE_NAME] === 'string'
-    ? manifest.dependencies[PACKAGE_NAME]
-    : undefined
-  const bundles = isRecord(manifest.dsh) && isRecord(manifest.dsh.profile) && Array.isArray(manifest.dsh.profile.bundles)
-    ? manifest.dsh.profile.bundles
-    : []
-  return { source, enabled: bundles.includes(PACKAGE_NAME) }
+/** Run one official management command and return its result. */
+function runDshPlugin(profile, args) {
+  return spawnSync('dsh', ['plugin', '--profile', profile, ...args], { encoding: 'utf8' })
 }
 
-function ensureInstallStructures(manifest) {
-  manifest.dependencies ||= {}
-  manifest.dsh ||= {}
-  manifest.dsh.profile ||= {}
-  manifest.dsh.profile.bundles ||= []
-}
-
-async function writeAndInstall(packagePath, profileDir, original, manifest) {
-  await atomicWrite(packagePath, `${JSON.stringify(manifest, null, 2)}\n`)
-  try {
-    runPackageInstall(profileDir)
-  } catch (error) {
-    await atomicWrite(packagePath, original)
-    throw error
-  }
+function describeResult(result) {
+  const output = `${result.stdout ?? ''}${result.stderr ?? ''}`.trim()
+  return output === '' ? '' : `\n${output.split('\n').slice(-8).join('\n')}`
 }
 
 async function main() {
@@ -139,46 +126,64 @@ async function main() {
     return
   }
 
-  const dshHome = resolve(process.env.DSH_HOME || join(homedir(), '.dsh'))
-  const profileDir = join(dshHome, 'profiles', options.profile)
-  const packagePath = join(profileDir, 'package.json')
-  const original = await readFile(packagePath, 'utf8')
-  const manifest = parseManifest(original)
-
   if (options.command === 'status') {
-    const installation = getInstallation(manifest)
-    if (installation.source && installation.enabled) {
-      console.log(`${PACKAGE_NAME} is installed in ${profileDir} from ${installation.source}`)
-    } else if (!installation.source && !installation.enabled) {
-      console.log(`${PACKAGE_NAME} is not installed in ${profileDir}`)
-    } else {
-      console.log(`${PACKAGE_NAME} is partially configured in ${profileDir}`)
+    const state = await readProfileState(options.profile)
+    if (state.state === 'installed') console.log(`${PACKAGE_NAME} is installed in ${join(state.packagePath, '..')} from ${state.source}`)
+    else if (state.state === 'absent') console.log(`${PACKAGE_NAME} is not installed in profile "${options.profile}"`)
+    else if (state.state === 'partial') console.log(`${PACKAGE_NAME} is partially configured in profile "${options.profile}" (source: ${state.source ?? 'none'})`)
+    else {
+      console.error(`Cannot read profile "${options.profile}": ${state.reason}`)
+      process.exitCode = 1
     }
     return
   }
 
+  const detection = detectDsh()
+  if (!detection.ok) {
+    console.error(dshFailureGuidance(detection))
+    process.exitCode = 1
+    return
+  }
+
   if (options.command === 'install') {
-    ensureInstallStructures(manifest)
-    manifest.dependencies[PACKAGE_NAME] = options.source
-    if (!manifest.dsh.profile.bundles.includes(PACKAGE_NAME)) {
-      manifest.dsh.profile.bundles.push(PACKAGE_NAME)
+    const result = runDshPlugin(options.profile, ['add', options.source, '--ignore-scripts'])
+    if (result.status !== 0) {
+      console.error(`dsh plugin add failed with exit code ${result.status}.${describeResult(result)}`)
+      process.exitCode = 1
+      return
     }
-    await writeAndInstall(packagePath, profileDir, original, manifest)
-    console.log(`\nInstalled ${PACKAGE_NAME} into ${profileDir} from ${options.source}`)
+    const state = await readProfileState(options.profile)
+    if (state.state !== 'installed') {
+      console.error(`Install postcondition not met after "dsh plugin add": profile "${options.profile}" does not list ${PACKAGE_NAME} as an installed bundle.`)
+      process.exitCode = 1
+      return
+    }
+    console.log(`\nInstalled ${PACKAGE_NAME} into profile "${options.profile}" from ${options.source} (dsh ${detection.version}).`)
   } else {
-    if (isRecord(manifest.dependencies)) delete manifest.dependencies[PACKAGE_NAME]
-    if (isRecord(manifest.dsh) && isRecord(manifest.dsh.profile) && Array.isArray(manifest.dsh.profile.bundles)) {
-      manifest.dsh.profile.bundles = manifest.dsh.profile.bundles.filter(item => item !== PACKAGE_NAME)
+    const state = await readProfileState(options.profile)
+    if (state.state === 'absent') {
+      console.log(`\n${PACKAGE_NAME} is not installed in profile "${options.profile}"; nothing to uninstall.`)
+      return
     }
-    await writeAndInstall(packagePath, profileDir, original, manifest)
-    console.log(`\nUninstalled ${PACKAGE_NAME} from ${profileDir}`)
+    const result = runDshPlugin(options.profile, ['remove', PACKAGE_NAME, '--ignore-scripts'])
+    if (result.status !== 0) {
+      console.error(`dsh plugin remove failed with exit code ${result.status}.${describeResult(result)}`)
+      process.exitCode = 1
+      return
+    }
+    const after = await readProfileState(options.profile)
+    if (after.state === 'installed' || after.state === 'partial') {
+      console.error(`Uninstall postcondition not met after "dsh plugin remove": profile "${options.profile}" still lists ${PACKAGE_NAME}.`)
+      process.exitCode = 1
+      return
+    }
+    console.log(`\nUninstalled ${PACKAGE_NAME} from profile "${options.profile}" (dsh ${detection.version}).`)
   }
 
   console.log('Restart DSH manually, then hard-refresh the existing Web GUI.')
 }
 
 main().catch((error) => {
-  const script = fileURLToPath(import.meta.url)
-  console.error(`${script}: ${error instanceof Error ? error.message : String(error)}`)
+  console.error(`dsh-visualization: ${error instanceof Error ? error.message : String(error)}`)
   process.exitCode = 1
 })

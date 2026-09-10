@@ -1,6 +1,6 @@
 {
   "name": "dsh-visualization",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Secure Mermaid, data-table, Vega-Lite, and static dsh-svg visualization bundle for DeepSeek Harness Web.",
   "type": "module",
   "main": "lib/index.js",

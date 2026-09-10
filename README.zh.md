@@ -9,30 +9,32 @@
 首选固定 Release 的安装器；不带命令时默认安装到 `web` profile：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.0
+npx --yes github:shaomingbo/dsh-visualization#v0.3.1
 ```
 
 使用同一固定版本查看状态或卸载：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.0 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.0 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.1 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.1 uninstall
 ```
 
 本地开发时保持安装器版本固定，只覆盖插件来源：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.0 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.1 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
-安装器支持 `--profile`、`--source` 和 `--help`。它只原子修改本插件的依赖与 bundle 条目，然后执行 `pnpm install --ignore-scripts`，不会重启 DSH。安装或卸载后请手动重启 DSH，并强制刷新现有 Web GUI。
+安装器支持 `--profile`、`--source` 和 `--help`。安装与卸载委托给宿主官方的 `dsh plugin` 管理命令（它会初始化缺失的 profile 并维护 bundle 清单）；安装器只依据退出状态和 profile manifest 校验结果，不直接改写 manifest。`status` 为只读。在没有 `dsh` CLI 的机器上、或 CLI 版本不在已验证矩阵内时，安装/卸载会给出引导并失败，不做任何写入。安装器从不重启 DSH。安装或卸载后请手动重启 DSH，并强制刷新现有 Web GUI。
 
-手动 CLI 兜底：
+**已验证的安装器矩阵：** `dsh` CLI `0.1.2-alpha.3` 搭配 DSH web/base `0.1.2-rc.1`（全新 profile 安装、幂等重装、status、幂等卸载与引导失败路径，均在隔离 `DSH_HOME` 中实测）。其余 CLI 版本在验证前会被明确拒绝；`dsh plugin` 依赖 `PATH` 上的 `pnpm`。
+
+手动 CLI 等价命令（安装器实际执行的命令）：
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.0
-dsh plugin --profile web remove dsh-visualization
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.1 --ignore-scripts
+dsh plugin --profile web remove dsh-visualization --ignore-scripts
 ```
 
 ## Host 兼容性
