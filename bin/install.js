@@ -6,7 +6,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 const PACKAGE_NAME = 'dsh-visualization'
-const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.1'
+const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.2'
 /** The dsh CLI release this installer was verified against, end to end. */
 const VERIFIED_DSH_VERSION = '0.1.2-alpha.3'
 const VERIFIED_HOST = 'DSH web/base 0.1.2-rc.1'
@@ -146,7 +146,7 @@ async function main() {
   }
 
   if (options.command === 'install') {
-    const result = runDshPlugin(options.profile, ['add', options.source, '--ignore-scripts'])
+    const result = runDshPlugin(options.profile, ['add', options.source, '--config.ignore-scripts=true'])
     if (result.status !== 0) {
       console.error(`dsh plugin add failed with exit code ${result.status}.${describeResult(result)}`)
       process.exitCode = 1
@@ -165,7 +165,9 @@ async function main() {
       console.log(`\n${PACKAGE_NAME} is not installed in profile "${options.profile}"; nothing to uninstall.`)
       return
     }
-    const result = runDshPlugin(options.profile, ['remove', PACKAGE_NAME, '--ignore-scripts'])
+    // pnpm 11 rejects `remove --ignore-scripts`; the config form is accepted
+    // by both add and remove and keeps lifecycle scripts disabled either way.
+    const result = runDshPlugin(options.profile, ['remove', PACKAGE_NAME, '--config.ignore-scripts=true'])
     if (result.status !== 0) {
       console.error(`dsh plugin remove failed with exit code ${result.status}.${describeResult(result)}`)
       process.exitCode = 1

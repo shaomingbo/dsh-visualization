@@ -9,20 +9,20 @@
 首选固定 Release 的安装器；不带命令时默认安装到 `web` profile：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.1
+npx --yes github:shaomingbo/dsh-visualization#v0.3.2
 ```
 
 使用同一固定版本查看状态或卸载：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.1 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.1 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.2 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.2 uninstall
 ```
 
 本地开发时保持安装器版本固定，只覆盖插件来源：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.1 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.2 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
@@ -33,8 +33,8 @@ npx --yes github:shaomingbo/dsh-visualization#v0.3.1 install \
 手动 CLI 等价命令（安装器实际执行的命令）：
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.1 --ignore-scripts
-dsh plugin --profile web remove dsh-visualization --ignore-scripts
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.2 --config.ignore-scripts=true
+dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 
 ## Host 兼容性
