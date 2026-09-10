@@ -2,12 +2,14 @@ import { useMemo, useSyncExternalStore } from 'react'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
 import { DataTable } from '../DataTable.tsx'
 import { MermaidVisualization } from '../MermaidVisualization.tsx'
+import { StaticSvgVisualization } from '../StaticSvgVisualization.tsx'
 import { VegaLiteVisualization } from '../VegaLiteVisualization.tsx'
 import { isMermaidFence, resolveMermaidFenceHeader } from '../mermaid-policy.ts'
+import { isStaticSvgFence } from '../svg-static-policy.ts'
 import type { VisualizationTheme } from '../types.ts'
 import { parseTable } from './parse.ts'
-import type { DataTableKey, MermaidKey, VegaLiteKey } from './locales.ts'
-import { visualizationLabels } from './locales.ts'
+import type { DataTableKey, MermaidKey, StaticSvgKey, VegaLiteKey } from './locales.ts'
+import { staticSvgLabels, visualizationLabels } from './locales.ts'
 
 export type Translate<Key extends string> = (key: Key, params?: Record<string, unknown>) => string
 
@@ -18,6 +20,7 @@ export interface LegacyCodeBlockProps {
   readonly tMermaid: Translate<MermaidKey>
   readonly tDataTable: Translate<DataTableKey>
   readonly tVegaLite: Translate<VegaLiteKey>
+  readonly tStaticSvg: Translate<StaticSvgKey>
 }
 
 /** Render one legacy DOM claim through the same secure presentation modules as the native slot adapter. */
@@ -28,6 +31,7 @@ export function LegacyCodeBlock({
   tMermaid,
   tDataTable,
   tVegaLite,
+  tStaticSvg,
 }: LegacyCodeBlockProps) {
   const activeTheme = useSyncExternalStore(theme.subscribe, theme.getSnapshot, theme.getSnapshot)
   if (isMermaidFence(language, source)) {
@@ -36,6 +40,14 @@ export function LegacyCodeBlock({
       diagramHeader={resolveMermaidFenceHeader(language)}
       settled
       labels={visualizationLabels(tMermaid as Translate<VegaLiteKey>)}
+      theme={activeTheme}
+    />
+  }
+  if (isStaticSvgFence(language)) {
+    return <StaticSvgVisualization
+      source={source}
+      settled
+      labels={staticSvgLabels(tStaticSvg)}
       theme={activeTheme}
     />
   }

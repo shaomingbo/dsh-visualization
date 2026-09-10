@@ -9,7 +9,7 @@ const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
 
 test('declares an installable DSH Web bundle and client entry', () => {
   assert.equal(pkg.name, 'dsh-visualization')
-  assert.equal(pkg.version, '0.2.8')
+  assert.equal(pkg.version, '0.3.0')
   assert.deepEqual(pkg.dsh.bundle, { patch: './cordis.patch.yml' })
   assert.equal(pkg.dsh.client.platform, 'web')
   assert.deepEqual(pkg.dsh.client.inject, [
@@ -19,14 +19,17 @@ test('declares an installable DSH Web bundle and client entry', () => {
     '@deepseek-ai/dsh-client-ui-theme',
   ])
   assert.equal(pkg.exports['./client'], './lib/client.js')
+  assert.equal(pkg.exports['./skill'], './lib/skill.js')
   assert.equal(pkg.exports['./cordis.patch.yml'], './cordis.patch.yml')
-  for (const file of ['lib/index.js', 'lib/invariant.js', 'lib/client.js', 'lib/vega-lite.worker.js']) {
+  for (const file of ['lib/index.js', 'lib/invariant.js', 'lib/client.js', 'lib/skill.js', 'lib/vega-lite.worker.js', 'skill']) {
     assert.ok(pkg.files.includes(file), `files omits ${file}`)
   }
 })
 
-test('patch mounts the exact package identity', () => {
+test('patch mounts the exact package identity with an isolated skill entry', () => {
   const patch = readFileSync(join(root, 'cordis.patch.yml'), 'utf8')
-  assert.match(patch, /id: dsh-visualization/)
-  assert.match(patch, /name: dsh-visualization/)
+  assert.match(patch, /id: dsh-visualization\b/)
+  assert.match(patch, /name: dsh-visualization\b/)
+  assert.match(patch, /id: dsh-visualization-skill/)
+  assert.match(patch, /name: dsh-visualization\/skill/)
 })

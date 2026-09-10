@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  createPreviewClaim,
   installLegacyEnhancer,
+  LEGACY_VISUALIZATION_FENCES,
   readLegacyFenceTarget,
+  readPreviewClaimState,
 } from '../src/client/legacy-dom.ts'
 
 class FakeElement {
@@ -70,6 +73,15 @@ test('legacy target reads normalized fence language and code text without HTML',
   })
 })
 
+test('legacy target recognizes the static dsh-svg fence', () => {
+  const { code } = codeBlock('dsh-svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>')
+  const target = readLegacyFenceTarget(code)
+  assert.ok(target !== null)
+  assert.equal(target.language, 'dsh-svg')
+  // The lower-cased DOM language must route through the static policy.
+  assert.equal(LEGACY_VISUALIZATION_FENCES.has(target.language), true)
+})
+
 test('legacy target ignores user, streaming, and unsupported code blocks', () => {
   assert.equal(readLegacyFenceTarget(codeBlock('mermaid', 'flowchart LR\nA --> B', { assistantStep: false }).code), null)
   assert.equal(readLegacyFenceTarget(codeBlock('mermaid', 'flowchart LR\nA --> B', { streaming: true }).code), null)
@@ -133,4 +145,113 @@ test('legacy enhancer mounts once, refreshes changed sources, and cleans every c
 
   stop()
   assert.equal(disconnected, true)
+})
+
+test('preview claim state requires a decoded image, not just a node', () => {
+  // Still decoding: the Host source must stay visible.
+  assert.equal(readPreviewClaimState({ complete: false, naturalWidth: 0 }), 'pending')
+  assert.equal(readPreviewClaimState({}), 'pending')
+  // Decoded with intrinsic size: the static protocol mandates a viewBox, so
+  // success always yields a nonzero size.
+  assert.equal(readPreviewClaimState({ complete: true, naturalWidth: 240 }), 'ready')
+  assert.equal(readPreviewClaimState({ complete: true, naturalWidth: 0 }), 'failed')
+})
+
+/** Minimal `<img>` fake: decode state, attachment flag, and load listeners. */
+class FakePreviewImage {
+  constructor({ complete = false, naturalWidth = 0, isConnected = true } = {}) {
+    this.complete = complete
+    this.naturalWidth = naturalWidth
+    this.isConnected = isConnected
+    this.watchers = []
+  }
+
+  addEventListener(type, listener, options) {
+    this.watchers.push({ listener, once: options?.once === true })
+  }
+
+  removeEventListener(type, listener) {
+    this.watchers = this.watchers.filter(entry => entry.listener !== listener)
+  }
+
+  /** Simulate the decode settling; `once` listeners are consumed like the DOM does. */
+  decode(naturalWidth = 240) {
+    this.complete = true
+    this.naturalWidth = naturalWidth
+    for (const entry of this.watchers.splice(0)) entry.listener()
+  }
+}
+
+test('preview claim gate claims a ready image and a completed decode', () => {
+  let claims = 0
+  const gate = createPreviewClaim(() => { claims += 1 }, () => true)
+  // A ready image claims immediately.
+  gate.consider(new FakePreviewImage({ complete: true, naturalWidth: 240 }))
+  assert.equal(claims, 1)
+  // A pending image claims when its decode completes.
+  const pending = new FakePreviewImage()
+  gate.consider(pending)
+  assert.equal(claims, 1)
+  pending.decode()
+  assert.equal(claims, 2)
+  // A failed decode never claims.
+  gate.consider(new FakePreviewImage({ complete: true, naturalWidth: 0 }))
+  assert.equal(claims, 2)
+})
+
+test('preview claim gate ignores a late load callback after disposal', () => {
+  const claims = []
+  const gate = createPreviewClaim(() => { claims.push('claim') }, () => true)
+  const pending = new FakePreviewImage()
+  gate.consider(pending)
+  assert.deepEqual(claims, [])
+  // The load callback can already be queued when cleanup runs: even though
+  // the listener was removed, the callback still fires — and must not claim.
+  const lateLoad = pending.watchers[0].listener
+  gate.dispose()
+  lateLoad()
+  assert.deepEqual(claims, [])
+  // A decode completing after disposal stays equally inert.
+  pending.decode()
+  assert.deepEqual(claims, [])
+})
+
+test('preview claim gate requires a live mount and an attached image', () => {
+  let live = true
+  const claims = []
+  const gate = createPreviewClaim(() => { claims.push('claim') }, () => live)
+  // Mount removed between watch and decode: no claim.
+  const pending = new FakePreviewImage()
+  gate.consider(pending)
+  live = false
+  pending.decode()
+  assert.deepEqual(claims, [])
+  // Image detached from the mount: no claim even on a live mount.
+  live = true
+  const detached = new FakePreviewImage()
+  detached.isConnected = false
+  gate.consider(detached)
+  detached.decode()
+  assert.deepEqual(claims, [])
+  // A ready image on a dead mount never claims either.
+  gate.consider(new FakePreviewImage({ complete: true, naturalWidth: 240, isConnected: false }))
+  assert.deepEqual(claims, [])
+})
+
+test('preview claim gate watches one pending image at a time without stacking listeners', () => {
+  const claims = []
+  const gate = createPreviewClaim(() => { claims.push('claim') }, () => true)
+  const image = new FakePreviewImage()
+  gate.consider(image)
+  gate.consider(image)
+  assert.equal(image.watchers.length, 1)
+  // A replaced image detaches the stale watch and adopts the new decode.
+  const replacement = new FakePreviewImage()
+  gate.consider(replacement)
+  assert.equal(image.watchers.length, 0)
+  assert.equal(replacement.watchers.length, 1)
+  image.decode()
+  assert.deepEqual(claims, [])
+  replacement.decode()
+  assert.deepEqual(claims, ['claim'])
 })

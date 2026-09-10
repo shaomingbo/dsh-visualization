@@ -28,7 +28,7 @@ export interface VisualizationTheme {
 /** Renderer SVG supplied to {@link VisualizationFrame} for mandatory sanitization and Blob isolation. */
 interface VisualizationPreview {
   readonly svg: string
-  readonly renderer: 'mermaid' | 'vega-lite'
+  readonly renderer: 'mermaid' | 'vega-lite' | 'static-svg'
   readonly alt: string
 }
 
@@ -78,6 +78,12 @@ export interface MermaidVisualizationProps extends VisualizationProps {
 /** Props for an inline-only Vega-Lite visualization. */
 export interface VegaLiteVisualizationProps extends VisualizationProps {
   readonly spec: unknown
+}
+
+/** Props for a settled, authored static `dsh-svg` document. */
+export interface StaticSvgVisualizationProps extends VisualizationProps {
+  /** Original fence body retained for source display and copying. */
+  readonly source: string
 }
 
 /** Localized labels for the accessible data table. */

@@ -1,7 +1,12 @@
 # Optional DeepSeek Harness Web visualization bundle.
-# Installed through `dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.2.8`.
-# The client half registers Mermaid, table, and Vega-Lite assistant code-block renderers.
+# Installed through `dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.0`.
+# The client half registers Mermaid, table, Vega-Lite, and static `dsh-svg`
+# assistant code-block renderers. The separate skill entry publishes the
+# packaged `dsh-diagram-design` skill and only needs the host `skills` service;
+# a composition without that service skips just this entry.
 
 - insert:
     - id: dsh-visualization
       name: dsh-visualization
+    - id: dsh-visualization-skill
+      name: dsh-visualization/skill

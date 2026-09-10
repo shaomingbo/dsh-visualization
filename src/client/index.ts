@@ -6,6 +6,7 @@ import { MERMAID_FENCE_HEADERS } from '../mermaid-policy.ts'
 import type { VisualizationTheme } from '../types.ts'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import { DataTableCodeBlock } from './DataTableCodeBlock.tsx'
+import { DshSvgCodeBlock } from './DshSvgCodeBlock.tsx'
 import { MermaidCodeBlock } from './MermaidCodeBlock.tsx'
 import { VegaLiteCodeBlock } from './VegaLiteCodeBlock.tsx'
 import { installLegacyDomAdapter } from './legacy-adapter.tsx'
@@ -16,11 +17,15 @@ import {
   MERMAID_NS,
   mermaidEn,
   mermaidZh,
+  STATIC_SVG_NS,
+  staticSvgEn,
+  staticSvgZh,
   VEGA_LITE_NS,
   vegaLiteEn,
   vegaLiteZh,
   type DataTableKey,
   type MermaidKey,
+  type StaticSvgKey,
   type VegaLiteKey,
 } from './locales.ts'
 
@@ -32,6 +37,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     dataTable: DataTableKey
     /** Vega-Lite preview controls and status copy. */
     vegaLite: VegaLiteKey
+    /** Static SVG preview controls and status copy. */
+    staticSvg: StaticSvgKey
   }
 }
 
@@ -64,6 +71,10 @@ export function apply(ctx: ClientContext): void {
     () => ctx.locale.register(VEGA_LITE_NS, { zh: vegaLiteZh, en: vegaLiteEn }),
     'dsh-visualization: Vega-Lite dictionaries',
   )
+  ctx.effect(
+    () => ctx.locale.register(STATIC_SVG_NS, { zh: staticSvgZh, en: staticSvgEn }),
+    'dsh-visualization: static SVG dictionaries',
+  )
 
   let snapshot = visualizationTheme(ctx.theme.getTheme())
   const listeners = new Set<() => void>()
@@ -88,6 +99,7 @@ export function apply(ctx: ClientContext): void {
         tMermaid: ctx.locale.bind(MERMAID_NS),
         tDataTable: ctx.locale.bind(DATA_TABLE_NS),
         tVegaLite: ctx.locale.bind(VEGA_LITE_NS),
+        tStaticSvg: ctx.locale.bind(STATIC_SVG_NS),
       })
       return () => {
         dispose()
@@ -123,5 +135,11 @@ export function apply(ctx: ClientContext): void {
       locale: VEGA_LITE_NS,
       inject: () => ({ hooks: { theme } }),
     }, VegaLiteCodeBlock)
+    yield ctx.slots.register({
+      name: CODE_BLOCK_SLOT,
+      key: 'dsh-svg',
+      locale: STATIC_SVG_NS,
+      inject: () => ({ hooks: { theme } }),
+    }, DshSvgCodeBlock)
   })
 }

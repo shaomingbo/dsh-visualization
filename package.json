@@ -1,13 +1,14 @@
 {
   "name": "dsh-visualization",
-  "version": "0.2.8",
-  "description": "Secure Mermaid, data-table, and Vega-Lite visualization bundle for DeepSeek Harness Web.",
+  "version": "0.3.0",
+  "description": "Secure Mermaid, data-table, Vega-Lite, and static dsh-svg visualization bundle for DeepSeek Harness Web.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
     "./invariant": "./lib/invariant.js",
     "./client": "./lib/client.js",
+    "./skill": "./lib/skill.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
@@ -20,14 +21,17 @@
     "lib/index.js",
     "lib/invariant.js",
     "lib/client.js",
+    "lib/skill.js",
     "lib/vega-lite.worker.js",
+    "skill",
     "README.md",
     "README.zh.md",
     "LICENSE"
   ],
   "scripts": {
     "test": "node --test",
-    "check": "node --check lib/*.js && node --check bin/install.js && node --test"
+    "check": "node --check lib/*.js && node --check bin/install.js && node --test",
+    "build": "node scripts/build.mjs"
   },
   "dsh": {
     "bundle": {
@@ -63,5 +67,17 @@
   "license": "MIT",
   "engines": {
     "node": ">=22.19.0"
+  },
+  "devDependencies": {
+    "css-tree": "^3.2.1",
+    "d3-dsv": "^3.0.1",
+    "dompurify": "^3.4.13",
+    "lightningcss": "^1.33.0",
+    "linkedom": "^0.18.13",
+    "mermaid": "^11.16.0",
+    "rolldown": "^1.2.8",
+    "vega": "^6.4.0",
+    "vega-interpreter": "^2.3.2",
+    "vega-lite": "^6.4.3"
   }
 }

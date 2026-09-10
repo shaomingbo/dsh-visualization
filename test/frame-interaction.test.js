@@ -27,9 +27,9 @@ test('preview offers an accessible expanded view with zoom controls', () => {
   assert.match(css, /\.lightboxCanvasPanning\s*\{[\s\S]*?cursor:\s*grabbing;/)
 })
 
-test('expanded-view controls are localized for Mermaid and Vega-Lite', () => {
+test('expanded-view controls are localized for Mermaid, Vega-Lite, and static SVG', () => {
   for (const key of ['expand', 'expandedView', 'close', 'zoomIn', 'zoomOut', 'resetZoom', 'fit', 'dragToPan']) {
-    assert.equal((locales.match(new RegExp(`'${key}':`, 'g')) ?? []).length, 4, `expected four locale entries for ${key}`)
+    assert.equal((locales.match(new RegExp(`'${key}':`, 'g')) ?? []).length, 6, `expected six locale entries for ${key}`)
   }
 })
 

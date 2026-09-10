@@ -5,6 +5,7 @@ import { CodeBlock, writeClipboard } from '@deepseek-ai/dsh-client-ui-primitives
 import { resolveLabels } from './labels.ts'
 import { useSvgUrl } from './render-lifecycle.ts'
 import { sanitizeVisualizationSvg } from './svg-sanitizer.ts'
+import { sanitizeStaticSvgDocument } from './svg-static-policy.ts'
 import type { VisualizationFrameProps } from './types.ts'
 import css from './VisualizationFrame.module.css'
 
@@ -23,8 +24,11 @@ export function VisualizationFrame(props: VisualizationFrameProps) {
   const [tab, setTab] = useState<'preview' | 'source'>(props.preferSource === true ? 'source' : 'preview')
   const [copied, setCopied] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  const [imgFailed, setImgFailed] = useState(false)
   const sanitized = useMemo(() => sanitizePreview(props.preview), [props.preview])
   const previewUrl = useSvgUrl(sanitized.svg)
+  // A new Blob URL replaces the previous image; failure state follows the URL.
+  useEffect(() => { setImgFailed(false) }, [previewUrl])
   const openExpanded = useCallback(() => { setExpanded(true) }, [])
   const closeExpanded = useCallback(() => { setExpanded(false) }, [])
 
@@ -40,7 +44,7 @@ export function VisualizationFrame(props: VisualizationFrameProps) {
     })
   }
   const showPreview = tab === 'preview'
-  const error = props.error ?? sanitized.error
+  const error = props.error ?? sanitized.error ?? (imgFailed ? 'The rendered preview failed to load' : undefined)
   return (
     <section className={css.frame} aria-label={props.title}>
       <header className={css.toolbar}>
@@ -66,9 +70,10 @@ export function VisualizationFrame(props: VisualizationFrameProps) {
               waiting={props.waiting}
               error={error}
               previewUrl={previewUrl}
-              alt={props.preview?.alt}
+              alt={sanitized.alt ?? props.preview?.alt}
               onRetry={props.onRetry}
               onExpand={openExpanded}
+              onImageError={() => { setImgFailed(true) }}
               labels={labels}
             />
           )
@@ -77,7 +82,7 @@ export function VisualizationFrame(props: VisualizationFrameProps) {
       {expanded && previewUrl !== undefined && createPortal(
         <PreviewLightbox
           previewUrl={previewUrl}
-          alt={props.preview?.alt}
+          alt={sanitized.alt ?? props.preview?.alt}
           title={props.title}
           dimensions={sanitized.dimensions}
           labels={labels}
@@ -97,6 +102,7 @@ interface PreviewBodyProps {
   readonly alt: string | undefined
   readonly onRetry: (() => void) | undefined
   readonly onExpand: () => void
+  readonly onImageError: () => void
   readonly labels: ReturnType<typeof resolveLabels>
 }
 
@@ -114,7 +120,12 @@ function PreviewBody(props: PreviewBodyProps) {
   const accessibleName = props.alt === undefined ? props.labels.expand : `${props.labels.expand}: ${props.alt}`
   return (
     <button type="button" className={css.previewTrigger} onClick={props.onExpand} aria-label={accessibleName} title={props.labels.expand}>
-      <img className={css.preview} src={props.previewUrl} alt="" />
+      <img
+        className={css.preview}
+        src={props.previewUrl}
+        alt=""
+        onError={() => { props.onImageError?.() }}
+      />
       <span className={css.expandHint} aria-hidden="true">↗ {props.labels.expand}</span>
     </button>
   )
@@ -302,12 +313,23 @@ function clampZoom(value: number): number {
   return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value))
 }
 
-function sanitizePreview(preview: VisualizationFrameProps['preview']): { readonly svg?: string; readonly dimensions?: SvgDimensions; readonly error?: string } {
+function sanitizePreview(preview: VisualizationFrameProps['preview']): { readonly svg?: string; readonly dimensions?: SvgDimensions; readonly alt?: string; readonly error?: string } {
   if (preview === undefined) return {}
   try {
+    if (preview.renderer === 'static-svg') {
+      // The static policy reads the accessible name from the validated
+      // document, so no component parses raw source before the size limit.
+      const document = sanitizeStaticSvgDocument(preview.svg)
+      const dimensions = readSvgDimensions(document.svg)
+      return {
+        svg: document.svg,
+        ...(dimensions === undefined ? {} : { dimensions }),
+        alt: document.title ?? preview.alt,
+      }
+    }
     const svg = sanitizeVisualizationSvg(preview.svg, preview.renderer)
     const dimensions = readSvgDimensions(svg)
-    return dimensions === undefined ? { svg } : { svg, dimensions }
+    return { svg, dimensions, alt: preview.alt }
   } catch (error) {
     return { error: error instanceof Error ? error.message : 'SVG sanitization failed' }
   }

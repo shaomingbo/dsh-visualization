@@ -18,6 +18,10 @@ test('browser artifact registers dsh-visualization without Node factory requires
   assert.match(source, /\/plugins\/dsh-visualization\/vega-lite\.worker\.js/)
   assert.match(source, /dataset\.plugin = "dsh-visualization"/)
   assert.match(source, /MERMAID_KEYS\s*=\s*\[\s*"mermaid",\s*"text"/)
+  assert.match(source, /key: "dsh-svg"/)
+  assert.match(source, /DshSvgCodeBlock/)
+  assert.match(source, /isStaticSvgFence/)
+  assert.match(source, /staticSvgLabels|staticSvgZh/)
   for (const key of ['kanban', 'quadrantchart', 'c4context', 'requirementdiagram']) {
     assert.match(source, new RegExp(`\\b${key}:`), `client bundle omits normalized fence key ${key}`)
   }

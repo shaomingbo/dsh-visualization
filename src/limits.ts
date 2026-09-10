@@ -22,6 +22,19 @@ export const LIMITS = Object.freeze({
   svgBytes: 2 * 1024 * 1024,
   svgElements: 20_000,
   svgAttributes: 64,
+  /** `dsh-svg` static channel: authored input and structure bounds. */
+  staticSvgSourceBytes: 128 * 1024,
+  staticSvgDepth: 32,
+  staticSvgTextBytes: 4 * 1024,
+  staticSvgExtent: 20_000,
+  staticSvgCoord: 1_000_000,
+  /**
+   * Percent-length bound. Relative lengths are not naturally bounded: `p%`
+   * renders at `p/100 × viewport`, and the viewport is capped by
+   * `staticSvgExtent`, so `staticSvgPercent/100 × staticSvgExtent` stays
+   * within `staticSvgCoord`.
+   */
+  staticSvgPercent: 5_000,
   queuePending: 4,
   workerTimeoutMs: 2_000,
 } as const)

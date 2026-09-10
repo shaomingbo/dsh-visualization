@@ -9,6 +9,7 @@ export const LEGACY_VISUALIZATION_FENCES = Object.freeze(new Set([
   'tsv',
   'json-table',
   'vega-lite',
+  'dsh-svg',
 ]))
 
 /** Minimal DOM face used by the structural fence reader and its tests. */
@@ -65,6 +66,90 @@ function findFenceLanguage(header: LegacyElement): string | undefined {
 export interface LegacyEnhancerTarget {
   readonly key: object
   readonly signature: string
+}
+
+/** Decode state of one preview image. */
+export type PreviewClaimState = 'ready' | 'failed' | 'pending'
+
+/**
+ * Decide whether one blob-preview image proves a successful render. The
+ * static protocol mandates a viewBox, so a decoded SVG always reports a
+ * nonzero intrinsic size; a failed decode reports `error`/zero size.
+ * @param image - the preview `<img>` (structural face for tests).
+ * @returns whether the preview is ready, failed, or still decoding.
+ */
+export function readPreviewClaimState(image: { complete?: boolean; naturalWidth?: number }): PreviewClaimState {
+  if (image.complete !== true) return 'pending'
+  return (image.naturalWidth ?? 0) > 0 ? 'ready' : 'failed'
+}
+
+/** Structural `<img>` face consumed by the claim gate (tests supply fakes). */
+export interface PreviewClaimImage {
+  readonly complete?: boolean
+  readonly naturalWidth?: number
+  isConnected?: boolean
+  addEventListener?: (type: 'load', listener: () => void, options?: { once: boolean }) => void
+  removeEventListener?: (type: 'load', listener: () => void, options?: { once: boolean }) => void
+}
+
+/** Liveness-gated claim control for one mount's preview images. */
+export interface PreviewClaimGate {
+  /** Re-evaluate one preview image; attaches a pending watch when needed. */
+  consider(image: PreviewClaimImage): void
+  /** Stop watching and stop claiming; late load callbacks are ignored. */
+  dispose(): void
+}
+
+/**
+ * Gate the Host-source claim behind a decoded image and a live mount. A `load`
+ * callback may still arrive after the mount was disposed — the event can be
+ * queued when cleanup runs — so the watch is removed on dispose and every
+ * callback re-checks mount liveness and image attachment before claiming.
+ * @param claim - hides the Host source; expected to be idempotent.
+ * @param isLive - whether the owning mount is still installed.
+ * @returns the claim gate for the mount's lifetime.
+ */
+export function createPreviewClaim(claim: () => void, isLive: () => boolean): PreviewClaimGate {
+  let disposed = false
+  let watched: PreviewClaimImage | undefined
+  let onWatchedLoad: (() => void) | undefined
+  const detach = () => {
+    if (watched !== undefined && onWatchedLoad !== undefined) {
+      watched.removeEventListener?.('load', onWatchedLoad, { once: true })
+    }
+    watched = undefined
+    onWatchedLoad = undefined
+  }
+  return {
+    consider(image) {
+      if (disposed) return
+      const state = readPreviewClaimState(image)
+      if (state === 'pending') {
+        if (watched === image) return // already watching this decode
+        detach()
+        watched = image
+        onWatchedLoad = () => {
+          // A callback already queued when dispose ran must not claim, and a
+          // detached image no longer backs a live preview.
+          if (watched !== image || !isLive() || image.isConnected !== true) return
+          if (readPreviewClaimState(image) === 'ready') claim()
+        }
+        image.addEventListener?.('load', onWatchedLoad, { once: true })
+        return
+      }
+      detach()
+      if (state === 'ready') {
+        // The same liveness and attachment checks as the load callback: the
+        // observer may run between disposal steps or on a replaced image.
+        if (!isLive() || image.isConnected !== true) return
+        claim()
+      }
+    },
+    dispose() {
+      disposed = true
+      detach()
+    },
+  }
 }
 
 /** Dependencies for the DOM-independent legacy claim lifecycle. */

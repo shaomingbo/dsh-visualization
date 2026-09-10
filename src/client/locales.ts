@@ -82,7 +82,6 @@ export const dataTableEn = {
 
 /** Vega-Lite dictionary namespace. */
 export const VEGA_LITE_NS = 'vegaLite'
-
 /** Simplified Chinese Vega-Lite dictionary. */
 export const vegaLiteZh = {
   'preview': '预览',
@@ -134,6 +133,81 @@ export const vegaLiteEn: Record<VegaLiteKey, string> = {
  * @returns labels accepted by the Cordis-free visualization component.
  */
 export function visualizationLabels(t: (key: VegaLiteKey) => string): VisualizationLabels {
+  return {
+    preview: t('preview'),
+    source: t('source'),
+    copy: t('copy'),
+    copied: t('copied'),
+    retry: t('retry'),
+    download: t('download'),
+    expand: t('expand'),
+    expandedView: t('expandedView'),
+    close: t('close'),
+    zoomIn: t('zoomIn'),
+    zoomOut: t('zoomOut'),
+    resetZoom: t('resetZoom'),
+    fit: t('fit'),
+    dragToPan: t('dragToPan'),
+    rendering: t('rendering'),
+    unavailable: t('unavailable'),
+    tooBusy: t('tooBusy'),
+  }
+}
+
+/** Static SVG dictionary namespace. */
+export const STATIC_SVG_NS = 'staticSvg'
+
+/** Simplified Chinese static SVG dictionary. */
+export const staticSvgZh = {
+  'preview': '预览',
+  'source': '源代码',
+  'copy': '复制',
+  'copied': '复制成功',
+  'retry': '重试',
+  'download': '下载 SVG',
+  'expand': '放大查看',
+  'expandedView': '可视化大图',
+  'close': '关闭',
+  'zoomIn': '放大',
+  'zoomOut': '缩小',
+  'resetZoom': '重置为 100%',
+  'fit': '适应窗口',
+  'dragToPan': '拖动查看局部',
+  'rendering': '正在渲染…',
+  'unavailable': '无法安全渲染此静态图示',
+  'tooBusy': '渲染队列已满，请稍后重试',
+}
+
+/** Static SVG dictionary key union. */
+export type StaticSvgKey = keyof typeof staticSvgZh
+
+/** English static SVG dictionary. */
+export const staticSvgEn: Record<StaticSvgKey, string> = {
+  'preview': 'Preview',
+  'source': 'Source',
+  'copy': 'Copy',
+  'copied': 'Copied',
+  'retry': 'Retry',
+  'download': 'Download SVG',
+  'expand': 'Expand',
+  'expandedView': 'Expanded visualization',
+  'close': 'Close',
+  'zoomIn': 'Zoom in',
+  'zoomOut': 'Zoom out',
+  'resetZoom': 'Reset to 100%',
+  'fit': 'Fit to window',
+  'dragToPan': 'Drag to pan',
+  'rendering': 'Rendering…',
+  'unavailable': 'Unable to render this static SVG safely',
+  'tooBusy': 'The render queue is full; try again later',
+}
+
+/**
+ * Resolve the static SVG label set through the active locale.
+ * @param t - namespace-bound translator.
+ * @returns labels accepted by the Cordis-free visualization component.
+ */
+export function staticSvgLabels(t: (key: StaticSvgKey) => string): VisualizationLabels {
   return {
     preview: t('preview'),
     source: t('source'),

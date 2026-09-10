@@ -3,8 +3,9 @@ import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-runtime/client'
 import type { VisualizationTheme } from '../types.ts'
 import { LegacyCodeBlock } from './LegacyCodeBlock.tsx'
 import type { Translate } from './LegacyCodeBlock.tsx'
-import type { DataTableKey, MermaidKey, VegaLiteKey } from './locales.ts'
+import type { DataTableKey, MermaidKey, StaticSvgKey, VegaLiteKey } from './locales.ts'
 import {
+  createPreviewClaim,
   installLegacyEnhancer,
   readLegacyFenceTarget,
   type LegacyEnhancerTarget,
@@ -23,6 +24,7 @@ export interface LegacyDomAdapterOptions {
   readonly tMermaid: Translate<MermaidKey>
   readonly tDataTable: Translate<DataTableKey>
   readonly tVegaLite: Translate<VegaLiteKey>
+  readonly tStaticSvg: Translate<StaticSvgKey>
 }
 
 /** Install the fail-open rc.2 DOM adapter and return its complete cleanup. */
@@ -36,31 +38,32 @@ export function installLegacyDomAdapter(options: LegacyDomAdapterOptions): () =>
       target.key.insertAdjacentElement('afterend', mount)
       const wasHidden = target.key.hidden
       let claimed = false
-      const claimPreview = () => {
-        if (claimed || mount.querySelector('img[src^="blob:"], table') === null) return
+      let disposed = false
+      const claim = () => {
+        if (claimed) return
         claimed = true
         target.key.hidden = true
+      }
+      // Claiming waits for a decoded preview and dies with the mount: a load
+      // callback that arrives after disposal — or after the image left the
+      // mount — must not re-hide the source the Host has restored.
+      const claimGate = createPreviewClaim(claim, () => !disposed && mount.isConnected)
+      const claimPreview = () => {
+        if (claimed || disposed) return
+        const img = mount.querySelector('img[src^="blob:"]')
+        if (img !== null) {
+          claimGate.consider(img)
+          return
+        }
+        if (mount.querySelector('table') !== null) claim()
       }
       const previewObserver = new MutationObserver(claimPreview)
       previewObserver.observe(mount, { subtree: true, childList: true, attributes: true, attributeFilter: ['src'] })
       const root = createRoot(mount)
-      try {
-        root.render(<LegacyCodeBlock
-          language={target.language}
-          source={target.source}
-          theme={options.theme}
-          tMermaid={options.tMermaid}
-          tDataTable={options.tDataTable}
-          tVegaLite={options.tVegaLite}
-        />)
-      } catch (error) {
-        previewObserver.disconnect()
-        root.unmount()
-        mount.remove()
-        target.key.hidden = wasHidden
-        throw error
-      }
-      return () => {
+      const dispose = () => {
+        if (disposed) return
+        disposed = true
+        claimGate.dispose()
         previewObserver.disconnect()
         try {
           root.unmount()
@@ -69,6 +72,21 @@ export function installLegacyDomAdapter(options: LegacyDomAdapterOptions): () =>
           target.key.hidden = wasHidden
         }
       }
+      try {
+        root.render(<LegacyCodeBlock
+          language={target.language}
+          source={target.source}
+          theme={options.theme}
+          tMermaid={options.tMermaid}
+          tDataTable={options.tDataTable}
+          tVegaLite={options.tVegaLite}
+          tStaticSvg={options.tStaticSvg}
+        />)
+      } catch (error) {
+        dispose()
+        throw error
+      }
+      return dispose
     },
     observe(refresh) {
       const observer = new MutationObserver(refresh)
