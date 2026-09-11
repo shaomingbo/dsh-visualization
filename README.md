@@ -9,31 +9,31 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 Use the fixed release installer. With no command it installs into the `web` profile:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.2
+npx --yes github:shaomingbo/dsh-visualization#v0.3.3
 ```
 
 Check status or uninstall with the same pinned release:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.2 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.2 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.3 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.3 uninstall
 ```
 
 For local development, keep the installer pinned but override its package source:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.2 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.3 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
 The installer supports `--profile`, `--source`, and `--help`. Install and uninstall delegate to the official `dsh plugin` management command, which initializes a missing profile and maintains the bundle list; the installer only verifies the outcome (exit status plus the profile manifest) and never edits the manifest itself. `status` is read-only. On a machine without the `dsh` CLI, or with a CLI version outside the verified matrix, install/uninstall fail with guidance and change nothing. The installer never restarts DSH. Restart DSH manually after install or uninstall, then hard-refresh the existing Web GUI.
 
-**Verified installer matrix:** `dsh` CLI `0.1.2-alpha.3` with DSH web/base `0.1.2-rc.1` (fresh-profile install, idempotent re-install, status, idempotent uninstall, and guidance failures were exercised against this matrix in an isolated `DSH_HOME`). Other CLI versions are intentionally rejected until verified; `pnpm` must be on `PATH` because `dsh plugin` forwards to it.
+**Verified installer matrix:** `dsh` CLI `0.1.2-alpha.3` or `0.1.5-rc.1` with matching DSH web/base (`0.1.2-rc.1` or `0.1.5-rc.1`). Other CLI versions are intentionally rejected; `pnpm` must be on `PATH` because `dsh plugin` forwards to it. Does not claim `0.1.5-*`.
 
 Manual CLI equivalent (what the installer runs):
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.2 --config.ignore-scripts=true
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.3 --config.ignore-scripts=true
 dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 

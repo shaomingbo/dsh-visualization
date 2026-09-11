@@ -6,10 +6,11 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 const PACKAGE_NAME = 'dsh-visualization'
-const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.2'
-/** The dsh CLI release this installer was verified against, end to end. */
-const VERIFIED_DSH_VERSION = '0.1.2-alpha.3'
-const VERIFIED_HOST = 'DSH web/base 0.1.2-rc.1'
+const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.3'
+/** Exact CLI versions this installer has been unit-tested against. Host web/base must still be smoke-tested per version. */
+const VERIFIED_DSH_VERSIONS = ['0.1.2-alpha.3', '0.1.5-rc.1']
+const VERIFIED_DSH_VERSION = VERIFIED_DSH_VERSIONS[0]
+const VERIFIED_HOST = 'DSH web/base 0.1.2-rc.1 or 0.1.5-rc.1'
 const COMMANDS = new Set(['install', 'status', 'uninstall'])
 
 function parseArgs(argv) {
@@ -54,7 +55,7 @@ Options:
 
 Install and uninstall delegate to the official \`dsh plugin\` management
 command, which initializes the profile and maintains the bundle list.
-Verified installer matrix: dsh ${VERIFIED_DSH_VERSION} with ${VERIFIED_HOST}.`
+Verified installer matrix: dsh ${VERIFIED_DSH_VERSIONS.join(' or ')} with ${VERIFIED_HOST}.`
 }
 
 function profilePackagePath(profile) {
@@ -97,16 +98,16 @@ function detectDsh() {
   if (probe.error !== undefined || probe.status !== 0) return { ok: false, reason: 'unknown' }
   const version = (probe.stdout ?? '').trim()
   if (version === '') return { ok: false, reason: 'unknown' }
-  if (version !== VERIFIED_DSH_VERSION) return { ok: false, reason: 'unverified', version }
+  if (!VERIFIED_DSH_VERSIONS.includes(version)) return { ok: false, reason: 'unverified', version }
   return { ok: true, version }
 }
 
 function dshFailureGuidance(detection) {
   if (detection.reason === 'missing') {
-    return `The dsh CLI was not found on PATH. Install DeepSeek Harness first (it provides dsh and the profiles/ layout), then re-run this installer. Verified installer matrix: dsh ${VERIFIED_DSH_VERSION} with ${VERIFIED_HOST}.`
+    return `The dsh CLI was not found on PATH. Install DeepSeek Harness first (it provides dsh and the profiles/ layout), then re-run this installer. Verified installer matrix: dsh ${VERIFIED_DSH_VERSIONS.join(' or ')} with ${VERIFIED_HOST}.`
   }
   const detected = detection.version !== undefined ? ` Detected dsh ${detection.version}.` : ''
-  return `dsh ${VERIFIED_DSH_VERSION} is the only CLI version this installer has verified (with ${VERIFIED_HOST}).${detected} Switch the dsh CLI to the verified version and re-run; see the README for the verified matrix.`
+  return `dsh ${VERIFIED_DSH_VERSIONS.join(' or ')} are the only CLI versions this installer has verified (with ${VERIFIED_HOST}).${detected} Switch the dsh CLI to a verified version and re-run; see the README for the verified matrix.`
 }
 
 /** Run one official management command and return its result. */

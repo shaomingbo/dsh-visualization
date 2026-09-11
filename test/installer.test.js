@@ -126,7 +126,7 @@ test('help documents the fixed release source, commands, and the dsh CLI require
 test('install initializes a fresh profile through the official CLI and is idempotent', async () => {
   const item = await fixture()
   try {
-    const source = 'github:shaomingbo/dsh-visualization#v0.3.2'
+    const source = 'github:shaomingbo/dsh-visualization#v0.3.3'
     for (const args of [
       ['--source', source],
       ['install', '--source', source],
@@ -145,8 +145,8 @@ test('install initializes a fresh profile through the official CLI and is idempo
     assert.match(status.stdout, /github:shaomingbo\/dsh-visualization#v0\.3\.2/)
     const calls = await readLog(item.dshLog)
     assert.deepEqual(calls.filter(line => line.startsWith('plugin')), [
-      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.2 --config.ignore-scripts=true',
-      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.2 --config.ignore-scripts=true',
+      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.3 --config.ignore-scripts=true',
+      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.3 --config.ignore-scripts=true',
     ])
   } finally {
     await rm(item.directory, { recursive: true, force: true })
@@ -220,6 +220,19 @@ test('an unverified dsh version fails with the verified matrix and never writes'
     // Only the --version probe ran; the management command was never called.
     const calls = await readLog(item.dshLog)
     assert.deepEqual(calls, ['--version'])
+  } finally {
+    await rm(item.directory, { recursive: true, force: true })
+  }
+})
+
+test('exact 0.1.5-rc.1 CLI is accepted by the installer matrix', async () => {
+  const item = await fixture()
+  try {
+    const result = run(['install'], { ...item.env, FAKE_DSH_VERSION: '0.1.5-rc.1' })
+    assert.equal(result.status, 0, result.stderr)
+    const calls = await readLog(item.dshLog)
+    assert.ok(calls.includes('--version'))
+    assert.ok(calls.some((line) => line.startsWith('plugin ')))
   } finally {
     await rm(item.directory, { recursive: true, force: true })
   }
