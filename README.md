@@ -9,20 +9,20 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 Use the fixed release installer. With no command it installs into the `web` profile:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.3
+npx --yes github:shaomingbo/dsh-visualization#v0.3.4
 ```
 
 Check status or uninstall with the same pinned release:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.3 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.3 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.4 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.4 uninstall
 ```
 
 For local development, keep the installer pinned but override its package source:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.3 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.4 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
@@ -33,7 +33,7 @@ The installer supports `--profile`, `--source`, and `--help`. Install and uninst
 Manual CLI equivalent (what the installer runs):
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.3 --config.ignore-scripts=true
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.4 --config.ignore-scripts=true
 dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 
