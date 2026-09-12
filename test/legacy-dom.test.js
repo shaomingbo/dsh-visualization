@@ -35,14 +35,32 @@ class FakeElement {
   }
 
   closest(selector) {
-    const match = /^\[([^=\]]+)(?:="([^"]+)")?\]$/.exec(selector)
-    if (match === null) throw new Error(`unexpected selector ${selector}`)
-    const [, name, value] = match
     for (let node = this; node !== null; node = node.parentElement) {
-      if (node.hasAttribute(name) && (value === undefined || node.attributes.get(name) === value)) return node
+      if (matches(node, selector)) return node
     }
     return null
   }
+
+  querySelector(selector) {
+    const pending = [...this.children]
+    while (pending.length > 0) {
+      const node = pending.shift()
+      if (matches(node, selector)) return node
+      pending.push(...node.children)
+    }
+    return null
+  }
+}
+
+function matches(node, selector) {
+  const attribute = /^\[([^=\]]+)(?:="([^"]+)")?\]$/.exec(selector)
+  if (attribute !== null) {
+    const [, name, value] = attribute
+    return node.hasAttribute(name) && (value === undefined || node.attributes.get(name) === value)
+  }
+  const className = /^\.([A-Za-z0-9_-]+)$/.exec(selector)
+  if (className !== null) return (node.attributes.get('class') ?? '').split(/\s+/).includes(className[1])
+  throw new Error(`unexpected selector ${selector}`)
 }
 
 function codeBlock(language, source, { streaming = false, assistantStep = true } = {}) {
@@ -63,6 +81,44 @@ function codeBlock(language, source, { streaming = false, assistantStep = true }
   return { assistant, shell, code }
 }
 
+/**
+ * Build the 0.1.5-frontend code-block shape: the banner and a
+ * `[data-code-block-content]` seat are siblings inside the shell, and the seat
+ * wraps the `<pre>`. `nested` models a deeper content seat.
+ */
+function codeBlock015(language, source, { nested = false } = {}) {
+  const assistant = new FakeElement('div')
+  assistant.setAttribute('data-chat-flow-kind', 'assistant-step')
+  const shell = new FakeElement('div')
+  shell.setAttribute('class', 'md-code-block')
+  const bannerWrap = new FakeElement('div')
+  bannerWrap.setAttribute('class', 'bannerWrap')
+  const banner = new FakeElement('div')
+  banner.setAttribute('class', 'banner')
+  banner.setAttribute('data-code-block-banner', '')
+  const label = new FakeElement('div', language)
+  const actions = new FakeElement('div')
+  actions.append(new FakeElement('button', '复制'))
+  banner.append(label, actions)
+  bannerWrap.append(banner)
+  const content = new FakeElement('div')
+  content.setAttribute('class', 'content')
+  content.setAttribute('data-code-block-content', '')
+  const pre = new FakeElement('pre')
+  const code = new FakeElement('code', source)
+  pre.append(code)
+  content.append(pre)
+  if (nested) {
+    const wrapper = new FakeElement('div')
+    wrapper.append(content)
+    shell.append(bannerWrap, wrapper)
+  } else {
+    shell.append(bannerWrap, content)
+  }
+  assistant.append(shell)
+  return { assistant, shell, content, code }
+}
+
 test('legacy target reads normalized fence language and code text without HTML', () => {
   const { shell, code } = codeBlock('C4Context', 'flowchart LR\nA --> B')
   const target = readLegacyFenceTarget(code)
@@ -80,6 +136,39 @@ test('legacy target recognizes the static dsh-svg fence', () => {
   assert.equal(target.language, 'dsh-svg')
   // The lower-cased DOM language must route through the static policy.
   assert.equal(LEGACY_VISUALIZATION_FENCES.has(target.language), true)
+})
+
+test('legacy target reads the 0.1.5 banner and data-code-block-content seats', () => {
+  const { shell, content, code } = codeBlock015('csv', 'name,type\ncsv,table')
+  const target = readLegacyFenceTarget(code)
+  assert.deepEqual(target, {
+    language: 'csv',
+    source: 'name,type\ncsv,table',
+    // The claim anchor must be the whole block, not the content seat inside it.
+    shell,
+  })
+  assert.notEqual(target.shell, content)
+})
+
+test('legacy target keeps the block shell when the content seat is nested deeper', () => {
+  const { shell, code } = codeBlock015('mermaid', 'flowchart LR\nA --> B', { nested: true })
+  assert.deepEqual(readLegacyFenceTarget(code), {
+    language: 'mermaid',
+    source: 'flowchart LR\nA --> B',
+    shell,
+  })
+})
+
+test('legacy target fails open on code-block markup without a banner seat', () => {
+  const assistant = new FakeElement('div')
+  assistant.setAttribute('data-chat-flow-kind', 'assistant-step')
+  const shell = new FakeElement('div')
+  const pre = new FakeElement('pre')
+  const code = new FakeElement('code', 'csv text in unknown markup')
+  pre.append(code)
+  shell.append(pre)
+  assistant.append(shell)
+  assert.equal(readLegacyFenceTarget(code), null)
 })
 
 test('legacy target ignores user, streaming, and unsupported code blocks', () => {

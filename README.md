@@ -9,37 +9,37 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 Use the fixed release installer. With no command it installs into the `web` profile:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5
 ```
 
 Check status or uninstall with the same pinned release:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5 uninstall
 ```
 
 For local development, keep the installer pinned but override its package source:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
 The installer supports `--profile`, `--source`, and `--help`. Install and uninstall delegate to the official `dsh plugin` management command, which initializes a missing profile and maintains the bundle list; the installer only verifies the outcome (exit status plus the profile manifest) and never edits the manifest itself. `status` is read-only. On a machine without the `dsh` CLI, or with a CLI version outside the verified matrix, install/uninstall fail with guidance and change nothing. The installer never restarts DSH. Restart DSH manually after install or uninstall, then hard-refresh the existing Web GUI.
 
-**Verified installer matrix:** `dsh` CLI `0.1.2-alpha.3` or `0.1.5-rc.1` with matching DSH web/base (`0.1.2-rc.1` or `0.1.5-rc.1`). Other CLI versions are intentionally rejected; `pnpm` must be on `PATH` because `dsh plugin` forwards to it. Does not claim `0.1.5-*`.
+**Verified installer matrix:** `dsh` CLI `0.1.2-alpha.3`, `0.1.5-rc.1`, or `0.1.5-rc.2` with matching DSH web/base (`0.1.2-rc.1`, `0.1.5-rc.1`, or `0.1.5-rc.2`). Other CLI versions, including other `0.1.5-*` releases, are intentionally rejected; `pnpm` must be on `PATH` because `dsh plugin` forwards to it.
 
 Manual CLI equivalent (what the installer runs):
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.4 --config.ignore-scripts=true
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.5 --config.ignore-scripts=true
 dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 
 ## Host compatibility
 
-The plugin selects its adapter by Host capability. Releases that provide the session-keyed `conversation.chat.assistant.codeBlock` slot use the native renderer seam. Published rc.2 Hosts that serve companion JavaScript under `/plugins/<id>/` but lack that slot use a fail-open DOM adapter: it observes settled code blocks, mounts the same secure renderer beside the Host source, and hides the Host block only after a valid preview exists. Unknown markup, streaming content, parse failures, and renderer failures keep the original source visible. The active mode is exposed as `document.documentElement.dataset.dshVisualizationAdapter` for local diagnostics.
+The plugin selects its adapter by Host capability. Releases that provide the session-keyed `conversation.chat.assistant.codeBlock` slot use the native renderer seam. Published rc.2 Hosts that serve companion JavaScript under `/plugins/<id>/` but lack that slot use a fail-open DOM adapter: it observes settled code blocks, mounts the same secure renderer beside the Host source, and hides the Host block only after a valid preview exists. The adapter anchors on semantic markers — the `md-code-block` shell, the `[data-code-block-banner]` seat, and the `[data-code-block-content]` seat added by the 0.1.5 frontends, which wraps the `<pre>` — and still accepts the pre-0.1.5 markup where the banner and the `<pre>` are direct siblings. Unknown markup, streaming content, parse failures, and renderer failures keep the original source visible. The active mode is exposed as `document.documentElement.dataset.dshVisualizationAdapter` for local diagnostics.
 
 ## Supported content
 

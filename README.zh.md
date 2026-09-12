@@ -9,37 +9,37 @@
 首选固定 Release 的安装器；不带命令时默认安装到 `web` profile：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5
 ```
 
 使用同一固定版本查看状态或卸载：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5 uninstall
 ```
 
 本地开发时保持安装器版本固定，只覆盖插件来源：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.4 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.5 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
 安装器支持 `--profile`、`--source` 和 `--help`。安装与卸载委托给宿主官方的 `dsh plugin` 管理命令（它会初始化缺失的 profile 并维护 bundle 清单）；安装器只依据退出状态和 profile manifest 校验结果，不直接改写 manifest。`status` 为只读。在没有 `dsh` CLI 的机器上、或 CLI 版本不在已验证矩阵内时，安装/卸载会给出引导并失败，不做任何写入。安装器从不重启 DSH。安装或卸载后请手动重启 DSH，并强制刷新现有 Web GUI。
 
-**已验证的安装器矩阵：** `dsh` CLI `0.1.2-alpha.3` 或 `0.1.5-rc.1`，搭配对应 web/base（`0.1.2-rc.1` 或 `0.1.5-rc.1`）。其余 CLI 版本会被拒绝。不承诺 `0.1.5-*`。
+**已验证的安装器矩阵：** `dsh` CLI `0.1.2-alpha.3`、`0.1.5-rc.1` 或 `0.1.5-rc.2`，搭配对应 web/base（`0.1.2-rc.1`、`0.1.5-rc.1` 或 `0.1.5-rc.2`）。其余 CLI 版本（含其他 `0.1.5-*`）会被拒绝。
 
 手动 CLI 等价命令（安装器实际执行的命令）：
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.4 --config.ignore-scripts=true
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.5 --config.ignore-scripts=true
 dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 
 ## Host 兼容性
 
-插件按 Host 能力选择适配器。提供 session/keyed `conversation.chat.assistant.codeBlock` 插槽的版本走原生渲染 seam；能够在 `/plugins/<id>/` 下提供 companion JavaScript、但缺少该插槽的已发布 rc.2 Host 走失败开放的 DOM 兼容适配器：它只观察已结算代码块，在 Host 源码旁挂载同一套安全渲染器，并且仅在有效预览出现后隐藏 Host 代码块。未知 DOM、流式内容、解析失败和渲染失败都会保留原始源码。当前模式可通过 `document.documentElement.dataset.dshVisualizationAdapter` 在本地诊断。
+插件按 Host 能力选择适配器。提供 session/keyed `conversation.chat.assistant.codeBlock` 插槽的版本走原生渲染 seam；能够在 `/plugins/<id>/` 下提供 companion JavaScript、但缺少该插槽的已发布 rc.2 Host 走失败开放的 DOM 兼容适配器：它只观察已结算代码块，在 Host 源码旁挂载同一套安全渲染器，并且仅在有效预览出现后隐藏 Host 代码块。适配器按语义锚点定位：代码块外壳 `md-code-block`、语言 banner `[data-code-block-banner]`，以及 0.1.5 前端新增、包裹 `<pre>` 的 `[data-code-block-content]` 座位；0.1.5 之前 banner 与 `<pre>` 直接同级的结构同样接受。未知 DOM、流式内容、解析失败和渲染失败都会保留原始源码。当前模式可通过 `document.documentElement.dataset.dshVisualizationAdapter` 在本地诊断。
 
 ## 支持内容
 

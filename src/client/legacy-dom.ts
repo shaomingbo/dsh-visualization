@@ -20,7 +20,15 @@ export interface LegacyElement {
   readonly parentElement: LegacyElement | null
   readonly previousElementSibling: LegacyElement | null
   closest?(selector: string): LegacyElement | null
+  querySelector?(selector: string): LegacyElement | null
 }
+
+/** Stable literal class on the Harness code-block shell across supported releases. */
+const CODE_BLOCK_SHELL_SELECTOR = '.md-code-block'
+/** Banner seat marker published by the 0.1.5 frontends. */
+const CODE_BLOCK_BANNER_SELECTOR = '[data-code-block-banner]'
+/** Content seat marker published by the 0.1.5 frontends, which wraps the `<pre>`. */
+const CODE_BLOCK_CONTENT_SELECTOR = '[data-code-block-content]'
 
 /** One settled supported code block discovered in the legacy Harness DOM. */
 export interface LegacyFenceTarget {
@@ -31,8 +39,14 @@ export interface LegacyFenceTarget {
 
 /**
  * Read a supported settled fence from the semantic code-block structure used by
- * legacy Harness releases. Syntax-highlighted spans are intentionally ignored:
- * source always comes from `code.textContent`.
+ * legacy Harness releases. Two Host generations are accepted:
+ *
+ * - pre-0.1.5: the shell holds the banner and the `<pre>` as direct siblings;
+ * - 0.1.5+:    the shell holds the banner and a `[data-code-block-content]`
+ *              seat, and that seat wraps the `<pre>`.
+ *
+ * Syntax-highlighted spans are intentionally ignored: source always comes from
+ * `code.textContent`.
  */
 export function readLegacyFenceTarget(code: LegacyElement): LegacyFenceTarget | null {
   if (code.tagName.toUpperCase() !== 'CODE') return null
@@ -40,14 +54,40 @@ export function readLegacyFenceTarget(code: LegacyElement): LegacyFenceTarget | 
   if (code.closest?.('[data-streaming]') !== null) return null
   const pre = code.parentElement
   if (pre?.tagName.toUpperCase() !== 'PRE') return null
-  const shell = pre.parentElement
-  const header = pre.previousElementSibling
-  if (shell === null || header === null || header.parentElement !== shell) return null
+  const parent = pre.parentElement
+  if (parent === null) return null
+  const content = pre.closest?.(CODE_BLOCK_CONTENT_SELECTOR) ?? null
+  const shell = code.closest?.(CODE_BLOCK_SHELL_SELECTOR) ?? (content === null ? parent : content.parentElement)
+  if (shell === null) return null
+  const header = resolveFenceBanner(shell, content, pre)
+  if (header === null) return null
   const language = findFenceLanguage(header)
   if (language === undefined) return null
   const source = code.textContent ?? ''
   if (language === 'text' && !isMermaidFence(language, source)) return null
   return { language, source, shell }
+}
+
+/**
+ * Resolve the banner seat whose subtree carries the fence language. The seat is
+ * the banner marker's outermost ancestor directly under the shell, falling back
+ * to the sibling position used before the banner marker existed.
+ * @param shell - the code-block shell that owns the banner.
+ * @param content - the `[data-code-block-content]` seat around the `<pre>`, when present.
+ * @param pre - the `<pre>` holding the fence body.
+ * @returns the direct child of the shell to read the language from, or `null` for unknown markup.
+ */
+function resolveFenceBanner(shell: LegacyElement, content: LegacyElement | null, pre: LegacyElement): LegacyElement | null {
+  const marked = shell.querySelector?.(CODE_BLOCK_BANNER_SELECTOR) ?? null
+  if (marked !== null) {
+    for (let node: LegacyElement | null = marked; node !== null; node = node.parentElement) {
+      if (node.parentElement === shell) return node
+    }
+    // A banner marker outside the shell's direct children is not trustworthy.
+    return null
+  }
+  const seat = content === null ? pre.previousElementSibling : content.previousElementSibling
+  return seat !== null && seat.parentElement === shell ? seat : null
 }
 
 function findFenceLanguage(header: LegacyElement): string | undefined {

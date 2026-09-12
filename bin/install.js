@@ -6,11 +6,11 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 const PACKAGE_NAME = 'dsh-visualization'
-const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.4'
+const DEFAULT_SOURCE = 'github:shaomingbo/dsh-visualization#v0.3.5'
 /** Exact CLI versions this installer has been unit-tested against. Host web/base must still be smoke-tested per version. */
-const VERIFIED_DSH_VERSIONS = ['0.1.2-alpha.3', '0.1.5-rc.1']
+const VERIFIED_DSH_VERSIONS = ['0.1.2-alpha.3', '0.1.5-rc.1', '0.1.5-rc.2']
 const VERIFIED_DSH_VERSION = VERIFIED_DSH_VERSIONS[0]
-const VERIFIED_HOST = 'DSH web/base 0.1.2-rc.1 or 0.1.5-rc.1'
+const VERIFIED_HOST = 'DSH web/base 0.1.2-rc.1, 0.1.5-rc.1, or 0.1.5-rc.2'
 const COMMANDS = new Set(['install', 'status', 'uninstall'])
 
 function parseArgs(argv) {

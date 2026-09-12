@@ -116,7 +116,7 @@ async function readLog(path) {
 test('help documents the fixed release source, commands, and the dsh CLI requirement', () => {
   const result = run(['--help'])
   assert.equal(result.status, 0, result.stderr)
-  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.3\.4/)
+  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.3\.5/)
   assert.match(result.stdout, /install\|status\|uninstall/)
   assert.match(result.stdout, /--profile web/)
   assert.match(result.stdout, /dsh plugin/)
@@ -126,7 +126,7 @@ test('help documents the fixed release source, commands, and the dsh CLI require
 test('install initializes a fresh profile through the official CLI and is idempotent', async () => {
   const item = await fixture()
   try {
-    const source = 'github:shaomingbo/dsh-visualization#v0.3.4'
+    const source = 'github:shaomingbo/dsh-visualization#v0.3.5'
     for (const args of [
       ['--source', source],
       ['install', '--source', source],
@@ -142,11 +142,11 @@ test('install initializes a fresh profile through the official CLI and is idempo
     const status = run(['status'], item.env)
     assert.equal(status.status, 0, status.stderr)
     assert.match(status.stdout, /installed/)
-    assert.match(status.stdout, /github:shaomingbo\/dsh-visualization#v0\.3\.4/)
+    assert.match(status.stdout, /github:shaomingbo\/dsh-visualization#v0\.3\.5/)
     const calls = await readLog(item.dshLog)
     assert.deepEqual(calls.filter(line => line.startsWith('plugin')), [
-      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.4 --config.ignore-scripts=true',
-      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.4 --config.ignore-scripts=true',
+      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.5 --config.ignore-scripts=true',
+      'plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.5 --config.ignore-scripts=true',
     ])
   } finally {
     await rm(item.directory, { recursive: true, force: true })
@@ -229,6 +229,19 @@ test('exact 0.1.5-rc.1 CLI is accepted by the installer matrix', async () => {
   const item = await fixture()
   try {
     const result = run(['install'], { ...item.env, FAKE_DSH_VERSION: '0.1.5-rc.1' })
+    assert.equal(result.status, 0, result.stderr)
+    const calls = await readLog(item.dshLog)
+    assert.ok(calls.includes('--version'))
+    assert.ok(calls.some((line) => line.startsWith('plugin ')))
+  } finally {
+    await rm(item.directory, { recursive: true, force: true })
+  }
+})
+
+test('exact 0.1.5-rc.2 CLI is accepted by the installer matrix', async () => {
+  const item = await fixture()
+  try {
+    const result = run(['install'], { ...item.env, FAKE_DSH_VERSION: '0.1.5-rc.2' })
     assert.equal(result.status, 0, result.stderr)
     const calls = await readLog(item.dshLog)
     assert.ok(calls.includes('--version'))

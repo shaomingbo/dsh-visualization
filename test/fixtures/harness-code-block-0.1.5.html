@@ -1,0 +1,55 @@
+<!--
+  Real code-block DOM captured from the running DSH 0.1.5-rc.2 Web GUI
+  (`document.querySelector('.md-code-block').outerHTML`), with hashed CSS-module
+  class names replaced by their plain equivalents. Structure, semantic
+  attributes, and text are unchanged.
+
+  The first two blocks use the 0.1.5 shape: the shell holds the banner and a
+  `[data-code-block-content]` seat, and that seat wraps the `<pre>`. The third
+  block models the pre-0.1.5 shape, where the banner and the `<pre>` are direct
+  siblings inside the shell; that generation is no longer installable here, so
+  it is reproduced from the released frontend bundle's element tree.
+-->
+<div class="markdown" data-chat-flow-kind="assistant-step">
+  <div data-fixture="csv-0.1.5">
+    <div class="md-code-block">
+      <div class="bannerWrap">
+        <div class="banner" data-code-block-banner="true">
+          <div class="infostring">csv</div>
+          <div class="action"><button type="button" class="copyButton">复制</button></div>
+        </div>
+      </div>
+      <div class="content" data-code-block-content="">
+        <pre class="plain"><code>name,type,version
+dsh-visualization,plugin,0.3.5
+dsh-token-usage,plugin,5.1.8</code></pre>
+      </div>
+    </div>
+  </div>
+  <div data-fixture="mermaid-0.1.5">
+    <div class="md-code-block">
+      <div class="bannerWrap">
+        <div class="banner" data-code-block-banner="true">
+          <div class="infostring">mermaid</div>
+          <div class="action"><button type="button" class="copyButton">复制</button></div>
+        </div>
+      </div>
+      <div class="content" data-code-block-content="">
+        <pre class="plain"><code>flowchart LR
+  A["fence"] --&gt;|legacy adapter| B["mount"]</code></pre>
+      </div>
+    </div>
+  </div>
+  <div data-fixture="csv-pre-0.1.5">
+    <div class="md-code-block">
+      <div class="bannerWrap">
+        <div class="banner">
+          <div class="infostring">csv</div>
+          <div class="action"><button type="button" class="copyButton">复制</button></div>
+        </div>
+      </div>
+      <pre class="plain"><code>legacy,markup
+csv,table</code></pre>
+    </div>
+  </div>
+</div>
