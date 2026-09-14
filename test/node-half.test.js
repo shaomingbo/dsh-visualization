@@ -24,6 +24,10 @@ test('node half registers only the four static prompt sections', () => {
   ])
   assert.match(sections[0].text, /"columns"/)
   assert.match(sections[0].text, /"rows"/)
+  // The hardened guidance documents the matrix shape and bans brace-comma pseudo-objects.
+  assert.match(sections[0].text, /first row is the header/)
+  assert.match(sections[0].text, /\{"A","B"\}/)
+  assert.match(sections[0].text, /are not JSON and fail to render/)
   assert.match(sections[1].text, /kanban/)
   assert.match(sections[1].text, /never a `text` fence/)
   assert.match(sections[1].text, /verifymethod/)

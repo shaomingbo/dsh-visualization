@@ -104,5 +104,7 @@ export interface DataTableProps {
   readonly rows: readonly (readonly string[])[]
   readonly labels: DataTableLabels
   readonly error?: string | undefined
+  /** Technical parse-failure reason rendered under the error label when present. */
+  readonly errorDetail?: string | undefined
   readonly pageSize?: number | undefined
 }

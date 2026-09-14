@@ -116,7 +116,7 @@ async function readLog(path) {
 test('help documents the fixed release source, commands, and the dsh CLI requirement', () => {
   const result = run(['--help'])
   assert.equal(result.status, 0, result.stderr)
-  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0\.3\.5/)
+  assert.match(result.stdout, /github:shaomingbo\/dsh-visualization#v0.3.6/)
   assert.match(result.stdout, /install\|status\|uninstall/)
   assert.match(result.stdout, /--profile web/)
   assert.match(result.stdout, /dsh plugin/)

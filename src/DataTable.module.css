@@ -49,6 +49,15 @@
   border-bottom: 1px solid var(--dsw-alias-border-l1, transparent);
 }
 
+.errorDetail {
+  padding: 0 12px;
+  margin: 2px 0 10px;
+  color: var(--dsw-alias-label-secondary, inherit);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
 .empty {
   padding: 16px;
   text-align: center;

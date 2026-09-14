@@ -63,6 +63,7 @@ export const dataTableZh = {
   'pagination.next': '下一页',
   'pagination.page': '第 {page} 页，共 {pages} 页',
   'error.invalid': '无法将此代码块解析为表格',
+  'error.cause': '失败原因：{detail}',
 } satisfies Record<string, string>
 
 /** Data-table dictionary key union. */
@@ -78,6 +79,7 @@ export const dataTableEn = {
   'pagination.next': 'Next page',
   'pagination.page': 'Page {page} of {pages}',
   'error.invalid': 'Unable to parse this code block as a table',
+  'error.cause': 'Cause: {detail}',
 } satisfies Record<DataTableKey, string>
 
 /** Vega-Lite dictionary namespace. */

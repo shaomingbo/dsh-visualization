@@ -37,6 +37,12 @@ test('browser artifact registers dsh-visualization without Node factory requires
   assert.match(source, /MutationObserver/)
   assert.match(source, /createRoot/)
   assert.match(source, /slots\.spec\(CODE_BLOCK_SLOT\)/)
+  // json-table hardening ships in the bundle: failure-cause labels, the errorDetail
+  // prop, and the first-row-is-header matrix parser.
+  assert.match(source, /error\.cause/)
+  assert.match(source, /errorDetail/)
+  assert.match(source, /parseJsonTableOutcome/)
+  assert.match(source, /first row is the header/)
   assert.doesNotMatch(source, nodeBuiltinRequire)
 
   let handoff

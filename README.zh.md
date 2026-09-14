@@ -9,20 +9,20 @@
 首选固定 Release 的安装器；不带命令时默认安装到 `web` profile：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6
 ```
 
 使用同一固定版本查看状态或卸载：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6 uninstall
 ```
 
 本地开发时保持安装器版本固定，只覆盖插件来源：
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
@@ -33,7 +33,7 @@ npx --yes github:shaomingbo/dsh-visualization#v0.3.5 install \
 手动 CLI 等价命令（安装器实际执行的命令）：
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.5 --config.ignore-scripts=true
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.6 --config.ignore-scripts=true
 dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 
@@ -51,6 +51,8 @@ dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 | `csv`、`tsv`、`json-table` | 可过滤、排序、分页的原生表格。 |
 | `vega-lite` | 在一次性 Worker 中渲染静态、仅内联数据的 Vega-Lite v6 图表。 |
 | `dsh-svg` | 模型手写的完整静态 SVG 文档，经独立白名单校验后以 Blob `<img>` 展示；详见下文"静态 dsh-svg 通道"。 |
+
+`json-table` 只接受合法 JSON 的三种形态：扁平对象数组（列取自 key 的首次出现顺序）、`{"columns":[...],"rows":[[...]]}` 显式表，以及首行为表头的行数组套数组（与 `csv` 的首行表头约定一致）。`{"A","B"}` 这类花括号逗号伪对象不是 JSON；解析失败时错误卡片会在本地化提示旁给出解析器的具体原因（例如 `Expected ':' after property name in JSON at position 14`），不再只报笼统错误。
 
 Mermaid 还支持 flowchart/graph、sequenceDiagram、classDiagram、stateDiagram-v2、erDiagram、gantt、pie、mindmap、timeline、gitGraph 和 journey。`xychart-beta`、`sankey-beta` 暂不启用。普通 `html`、`svg`、`xml` 代码块不会被本插件接管，仍保持源码展示。
 

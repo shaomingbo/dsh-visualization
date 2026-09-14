@@ -52,6 +52,7 @@ export function DataTable(props: DataTableProps) {
     return (
       <section className={css.frame} role="alert">
         <p>{props.error}</p>
+        {props.errorDetail !== undefined && <p className={css.errorDetail}>{props.errorDetail}</p>}
         <CodeBlock code={props.rows.map(row => row.join('\t')).join('\n')} lang="csv" copyLabel={props.labels.empty} copiedLabel={props.labels.empty} />
       </section>
     )

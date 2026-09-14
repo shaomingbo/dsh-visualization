@@ -3,7 +3,7 @@ import type { AssistantCodeBlockViewProps } from '@deepseek-ai/dsh-client-ui-con
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import { DataTable } from '../DataTable.tsx'
 import type { DATA_TABLE_NS } from './locales.ts'
-import { parseTable } from './parse.ts'
+import { parseTableOutcome } from './parse.ts'
 
 /** Props composed for one CSV, TSV, or JSON-table Assistant fence. */
 export type DataTableCodeBlockProps = AssistantCodeBlockViewProps & PropsLocale<typeof DATA_TABLE_NS>
@@ -11,10 +11,10 @@ export type DataTableCodeBlockProps = AssistantCodeBlockViewProps & PropsLocale<
 /**
  * Parse and render one settled table fence with localized table controls.
  * @param props - fence language, source, and locale seat.
- * @returns the shared table presentation, or nothing for invalid JSON-table input.
+ * @returns the shared table presentation, or the parse failure with its technical reason.
  */
 export function DataTableCodeBlock({ language, source, t }: DataTableCodeBlockProps) {
-  const table = useMemo(() => parseTable(language, source), [language, source])
+  const outcome = useMemo(() => parseTableOutcome(language, source), [language, source])
   const labels = useMemo(() => ({
     filterPlaceholder: t('filter.placeholder'),
     empty: t('empty'),
@@ -25,12 +25,14 @@ export function DataTableCodeBlock({ language, source, t }: DataTableCodeBlockPr
     page: (page: number, pages: number) => t('pagination.page', { page, pages }),
     error: t('error.invalid'),
   }), [t])
+  const errorDetail = outcome.ok ? undefined : t('error.cause', { detail: outcome.failure.detail })
 
   return <DataTable
-    columns={table?.columns ?? []}
-    rows={table?.rows ?? []}
+    columns={outcome.ok ? outcome.table.columns : []}
+    rows={outcome.ok ? outcome.table.rows : []}
     labels={labels}
-    error={table === null ? labels.error : undefined}
+    error={outcome.ok ? undefined : labels.error}
+    errorDetail={errorDetail}
     pageSize={50}
   />
 }

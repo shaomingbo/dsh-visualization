@@ -7,7 +7,7 @@ import { VegaLiteVisualization } from '../VegaLiteVisualization.tsx'
 import { isMermaidFence, resolveMermaidFenceHeader } from '../mermaid-policy.ts'
 import { isStaticSvgFence } from '../svg-static-policy.ts'
 import type { VisualizationTheme } from '../types.ts'
-import { parseTable } from './parse.ts'
+import { parseTableOutcome } from './parse.ts'
 import type { DataTableKey, MermaidKey, StaticSvgKey, VegaLiteKey } from './locales.ts'
 import { staticSvgLabels, visualizationLabels } from './locales.ts'
 
@@ -71,7 +71,7 @@ function LegacyDataTable({
   readonly source: string
   readonly t: Translate<DataTableKey>
 }) {
-  const table = useMemo(() => parseTable(language, source), [language, source])
+  const outcome = useMemo(() => parseTableOutcome(language, source), [language, source])
   const labels = useMemo(() => ({
     filterPlaceholder: t('filter.placeholder'),
     empty: t('empty'),
@@ -82,11 +82,13 @@ function LegacyDataTable({
     page: (page: number, pages: number) => t('pagination.page', { page, pages }),
     error: t('error.invalid'),
   }), [t])
+  const errorDetail = outcome.ok ? undefined : t('error.cause', { detail: outcome.failure.detail })
   return <DataTable
-    columns={table?.columns ?? []}
-    rows={table?.rows ?? []}
+    columns={outcome.ok ? outcome.table.columns : []}
+    rows={outcome.ok ? outcome.table.rows : []}
     labels={labels}
-    error={table === null ? labels.error : undefined}
+    error={outcome.ok ? undefined : labels.error}
+    errorDetail={errorDetail}
     pageSize={50}
   />
 }

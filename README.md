@@ -9,20 +9,20 @@ It is a GitHub-distributed DSH bundle, not a shell modification. Without it, ass
 Use the fixed release installer. With no command it installs into the `web` profile:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6
 ```
 
 Check status or uninstall with the same pinned release:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5 status
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5 uninstall
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6 status
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6 uninstall
 ```
 
 For local development, keep the installer pinned but override its package source:
 
 ```bash
-npx --yes github:shaomingbo/dsh-visualization#v0.3.5 install \
+npx --yes github:shaomingbo/dsh-visualization#v0.3.6 install \
   --source link:/absolute/path/to/dsh-visualization
 ```
 
@@ -33,7 +33,7 @@ The installer supports `--profile`, `--source`, and `--help`. Install and uninst
 Manual CLI equivalent (what the installer runs):
 
 ```bash
-dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.5 --config.ignore-scripts=true
+dsh plugin --profile web add github:shaomingbo/dsh-visualization#v0.3.6 --config.ignore-scripts=true
 dsh plugin --profile web remove dsh-visualization --config.ignore-scripts=true
 ```
 
@@ -51,6 +51,8 @@ The plugin selects its adapter by Host capability. Releases that provide the ses
 | `csv`, `tsv`, `json-table` | Filterable, sortable, paginated native table. |
 | `vega-lite` | Static inline-only Vega-Lite v6 chart in a one-shot Worker. |
 | `dsh-svg` | A model-authored complete static SVG document, validated against an independent allowlist and shown as a Blob `<img>`; see "Static dsh-svg channel" below. |
+
+`json-table` accepts exactly valid JSON in three shapes: an array of flat objects (columns are the union of keys in first-seen order), an explicit `{"columns":[...],"rows":[[...]]}` object, or an array of row arrays whose first row is the header — the same first-row-is-header convention as `csv`. Brace-comma pseudo-objects such as `{"A","B"}` are not JSON; instead of a generic message, the error card names the JSON parser's concrete reason (e.g. `Expected ':' after property name in JSON at position 14`) next to the localized label.
 
 Mermaid also supports flowchart/graph, sequenceDiagram, classDiagram, stateDiagram-v2, erDiagram, gantt, pie, mindmap, timeline, gitGraph, and journey. `xychart-beta` and `sankey-beta` are intentionally not enabled. Ordinary `html`, `svg`, and `xml` code blocks are never taken over by this plugin and stay as source.
 
